@@ -24,7 +24,7 @@ const HUB_RETURN_KEY = 'connecteo_hub_return_url';
 
 function resolveHubReturnUrl(): string {
   try {
-    if (typeof window === 'undefined') return '../index.html';
+    if (typeof window === 'undefined') return 'https://le-recouvrement.vercel.app/index.html';
     const ref = document.referrer;
     if (ref) {
       const refUrl = new URL(ref);
@@ -44,7 +44,7 @@ function resolveHubReturnUrl(): string {
   } catch {
     // Ignore URL or sessionStorage access errors
   }
-  return '../index.html';
+  return 'https://le-recouvrement.vercel.app/index.html';
 }
 
 const DEFAULT_REPORT_CONFIG: ReportConfig = {
