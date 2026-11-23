@@ -144,17 +144,31 @@ export function buildStandaloneReportHtml(
   <title>${esc(config.reportTitle)} — Connecteo</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Mada:wght@400;600;700;900&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
   <style>
+    @page { size: A4 landscape; margin: 10mm 12mm; }
     * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    body { font-family: 'Mada', sans-serif; color: #1d2b30; background: #ffffff; max-width: 960px; margin: 36px auto; padding: 0 28px 60px; line-height: 1.65; }
+    body { font-family: 'Mada', sans-serif; color: #1d2b30; background: #ffffff; max-width: 1040px; margin: 36px auto; padding: 0 28px 60px; line-height: 1.65; }
     h1 { font-size: 32px; font-weight: 900; color: #096475; margin: 0 0 8px; line-height: 1.15; }
-    h2 { font-size: 19px; font-weight: 900; color: #096475; margin: 34px 0 14px; padding-bottom: 8px; border-bottom: 1px solid #d7e4e7; }
+    h2 { font-size: 19px; font-weight: 900; color: #096475; margin: 34px 0 14px; padding-bottom: 8px; border-bottom: 1px solid #d7e4e7; break-after: avoid; page-break-after: avoid; }
     .kpi-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
     .kpi { border: 1px solid #e1e9eb; border-radius: 12px; padding: 14px; background: #fafcfd; }
     .kpi .v { font-size: 24px; font-weight: 900; font-family: 'JetBrains Mono', monospace; color: #096475; }
     .kpi .l { font-size: 11px; color: #6d7d83; margin-top: 4px; }
     .quote { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 19px; color: #096475; padding: 18px 0; margin: 20px 0; border-top: 1px solid #d7e4e7; border-bottom: 1px solid #d7e4e7; }
+    .charts-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; align-items: start; }
+    .rec-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
     .learner-card { border: 1px solid #e1e9eb; border-radius: 14px; padding: 20px; margin-bottom: 18px; break-inside: avoid; page-break-inside: avoid; }
-    @media print { body { margin: 0; padding: 16px; } }
+    .no-break { break-inside: avoid; page-break-inside: avoid; }
+    @media print {
+      body { max-width: none; margin: 0; padding: 0; }
+      header { padding-bottom: 14px !important; margin-bottom: 18px !important; break-inside: avoid; page-break-inside: avoid; }
+      h2 { margin-top: 0; margin-bottom: 12px; }
+      .kpi-grid { margin: 14px 0; }
+      .quote { padding: 12px 0; margin: 14px 0; }
+      .section-break { break-before: page; page-break-before: always; }
+      .learner-card { padding: 16px; margin-bottom: 0; }
+      .learner-card + .learner-card { break-before: page; page-break-before: always; }
+      footer { margin-top: 20px !important; padding-top: 12px !important; break-inside: avoid; page-break-inside: avoid; }
+    }
   </style>
 </head>
 <body>
@@ -170,7 +184,7 @@ export function buildStandaloneReportHtml(
   </header>
 
   ${config.includeExecutiveNarrative ? `
-  <section>
+  <section class="no-break">
     <h2>01. Synthèse exécutive & narration des résultats</h2>
     <p style="font-size:17px;font-weight:700;color:#1d2b30;margin-bottom:12px;">${esc(analysis.executiveHeadline)}</p>
     <div class="kpi-grid">
@@ -186,32 +200,35 @@ export function buildStandaloneReportHtml(
   </section>` : ''}
 
   ${config.includeCharts ? `
-  <section>
+  <section class="${config.includeExecutiveNarrative ? 'section-break ' : ''}no-break">
     <h2>02. Visualisation des trajectoires & piliers pédagogiques</h2>
-    <div style="border:1px solid #e1e9eb;border-radius:14px;padding:18px;margin-bottom:18px;">
-      <h3 style="margin:0 0 10px;font-size:15px;color:#096475;">Trajectoires individuelles (Pré-quiz → Final)</h3>
-      ${slopeSvg}
+    <div class="charts-grid">
+      <div style="border:1px solid #e1e9eb;border-radius:14px;padding:16px;">
+        <h3 style="margin:0 0 10px;font-size:15px;color:#096475;">Trajectoires individuelles (Pré-quiz → Final)</h3>
+        ${slopeSvg}
+      </div>
+      <div style="border:1px solid #e1e9eb;border-radius:14px;padding:16px;">
+        <h3 style="margin:0 0 10px;font-size:15px;color:#096475;">Performance comparée par pilier (J1–J4)</h3>
+        ${modulesHtml}
+      </div>
     </div>
-    <div style="border:1px solid #e1e9eb;border-radius:14px;padding:18px;">
-      <h3 style="margin:0 0 10px;font-size:15px;color:#096475;">Performance comparée par pilier (J1–J4)</h3>
-      ${modulesHtml}
-      <p style="font-size:14px;color:#334155;margin-top:12px;">${esc(analysis.moduleNarrative)}</p>
-    </div>
+    <p style="font-size:14px;color:#334155;margin-top:14px;padding:12px 14px;border:1px solid #e1e9eb;border-radius:10px;background:#f8fbfb;">${esc(analysis.moduleNarrative)}</p>
   </section>` : ''}
 
   ${config.includeIndividualNarratives ? `
-  <section>
+  <section class="${config.includeExecutiveNarrative || config.includeCharts ? 'section-break' : ''}">
     <h2>03. Bilans individuels détaillés</h2>
     ${learnersHtml}
   </section>` : ''}
 
   ${config.includeActionPlan ? `
-  <section>
+  <section class="${config.includeExecutiveNarrative || config.includeCharts || config.includeIndividualNarratives ? 'section-break ' : ''}no-break">
     <h2>04. Recommandations managériales & accompagnement</h2>
+    <div class="rec-grid">
     ${analysis.recommendations
       .map(
         (rec) => `
-      <div style="border:1px solid #e1e9eb;border-radius:12px;padding:16px;margin-bottom:12px;">
+      <div class="no-break" style="border:1px solid #e1e9eb;border-radius:12px;padding:16px;background:#fafcfd;">
         <div style="font-size:11px;font-weight:700;color:#00afa9;margin-bottom:4px;">${esc(rec.priority)}</div>
         <div style="font-size:15px;font-weight:700;color:#096475;margin-bottom:4px;">${esc(rec.title)}</div>
         <div style="font-size:13px;color:#47585e;margin-bottom:6px;">${esc(rec.rationale)}</div>
@@ -219,6 +236,7 @@ export function buildStandaloneReportHtml(
       </div>`
       )
       .join('')}
+    </div>
   </section>` : ''}
 
   <footer style="margin-top:42px;padding-top:18px;border-top:1px solid #e1e9eb;text-align:center;font-size:12px;color:#6d7d83;">

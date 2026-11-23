@@ -346,8 +346,8 @@ export const ReportView: React.FC<Props> = ({
          ================================================================ */}
       <div className="bg-white border border-[#e1e9eb] rounded-2xl px-6 py-8 sm:px-12 sm:py-12 max-w-[1040px] mx-auto print-only-full">
         {/* Document Header */}
-        <header className="pb-8 border-b border-[#d9e5e7] mb-10">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <header className="pb-8 border-b border-[#d9e5e7] mb-10 print-compact-header print-break-inside-avoid">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6 print:mb-3">
             <img
               src={logoDataUri}
               alt="Connecteo"
@@ -358,7 +358,7 @@ export const ReportView: React.FC<Props> = ({
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-black text-[#096475] tracking-tight leading-tight max-w-3xl [text-wrap:balance]">
+          <h1 className="text-3xl sm:text-4xl font-black text-[#096475] tracking-tight leading-tight max-w-3xl print-max-w-none [text-wrap:balance]">
             {config.reportTitle}
           </h1>
 
@@ -386,20 +386,20 @@ export const ReportView: React.FC<Props> = ({
 
         {/* 01. SYNTHÈSE EXÉCUTIVE & NARRATION */}
         {config.includeExecutiveNarrative && (
-          <section className="mb-12">
-            <div className="flex items-baseline gap-2.5 mb-4 pb-2.5 border-b border-[#e8eff1]">
+          <section className="mb-12 print-compact-section print-break-inside-avoid">
+            <div className="flex items-baseline gap-2.5 mb-4 pb-2.5 border-b border-[#e8eff1] print-break-after-avoid">
               <span className="text-xs font-mono font-bold text-[#00afa9]">01.</span>
               <h2 className="text-xl font-black text-[#096475]">
                 Synthèse exécutive & narration des résultats
               </h2>
             </div>
 
-            <p className="text-lg sm:text-xl font-bold text-[#1d2b30] leading-snug mb-6 max-w-3xl [text-wrap:balance]">
+            <p className="text-lg sm:text-xl font-bold text-[#1d2b30] leading-snug mb-6 print:mb-4 max-w-3xl print-max-w-none [text-wrap:balance]">
               {analysis.executiveHeadline}
             </p>
 
             {/* Clean KPI Strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-7">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 print-grid-6 gap-3 mb-7 print:mb-4">
               <div className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-4">
                 <div className="text-xs text-[#6d7d83] font-semibold">Effectif évalué</div>
                 <div className="text-2xl font-black text-[#096475] font-mono tabular-nums mt-1">
@@ -469,7 +469,7 @@ export const ReportView: React.FC<Props> = ({
             </div>
 
             {/* Automated Editorial Narrative */}
-            <div className="space-y-3.5 max-w-3xl text-[15px] text-[#334155] leading-relaxed">
+            <div className="space-y-3.5 print:space-y-2 max-w-3xl print-max-w-none text-[15px] text-[#334155] leading-relaxed">
               {config.customIntro.trim() && (
                 <p className="text-[#1d2b30] font-medium">{config.customIntro.trim()}</p>
               )}
@@ -479,7 +479,7 @@ export const ReportView: React.FC<Props> = ({
             </div>
 
             {/* Editorial Serif Pull Quote (no thick left border — subtle top & bottom hairlines) */}
-            <blockquote className="my-7 py-5 border-y border-[#dbe7e9] font-serif italic text-lg sm:text-xl text-[#096475] leading-relaxed max-w-3xl">
+            <blockquote className="my-7 py-5 print-compact-quote border-y border-[#dbe7e9] font-serif italic text-lg sm:text-xl text-[#096475] leading-relaxed max-w-3xl print-max-w-none">
               {analysis.pullQuote}
             </blockquote>
           </section>
@@ -487,19 +487,19 @@ export const ReportView: React.FC<Props> = ({
 
         {/* 02. ARCHITECTURE DU PARCOURS */}
         {config.includeRoadmap && (
-          <section className="mb-12 print-break-inside-avoid">
-            <div className="flex items-baseline gap-2.5 mb-4 pb-2.5 border-b border-[#e8eff1]">
+          <section className="mb-12 print:mb-0 print-break-inside-avoid">
+            <div className="flex items-baseline gap-2.5 mb-4 pb-2.5 border-b border-[#e8eff1] print-break-after-avoid">
               <span className="text-xs font-mono font-bold text-[#00afa9]">02.</span>
               <h2 className="text-xl font-black text-[#096475]">
                 Architecture pédagogique — Parcours 5 jours
               </h2>
             </div>
 
-            <p className="text-sm text-[#47585e] mb-5 max-w-3xl">
+            <p className="text-sm text-[#47585e] mb-5 print:mb-3 max-w-3xl print-max-w-none">
               Le dispositif s’est articulé autour d’une progression opérationnelle en cinq étapes, guidée par le fil rouge « Chaque expérience est unique ».
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 print-grid-5 gap-3">
               {ROADMAP_DAYS.map((step) => (
                 <div
                   key={step.day}
@@ -520,57 +520,65 @@ export const ReportView: React.FC<Props> = ({
 
         {/* 03. GRAPHIQUES INTERACTIFS & ANALYSE PAR COMPÉTENCE */}
         {config.includeCharts && (
-          <section className="mb-12">
-            <div className="flex items-baseline gap-2.5 mb-5 pb-2.5 border-b border-[#e8eff1]">
-              <span className="text-xs font-mono font-bold text-[#00afa9]">03.</span>
-              <h2 className="text-xl font-black text-[#096475]">
-                Visualisations interactives & analyse par compétence
-              </h2>
-            </div>
-
-            {/* Chart 1 & 2 */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-              <div className="lg:col-span-7 rounded-2xl border border-[#e5ecee] bg-white p-5">
-                <ProgressionSlopeChart
-                  analyses={analysis.learnerAnalyses}
-                  selectedEmail={selectedEmail}
-                  onSelectLearner={handleSelectLearner}
-                />
+          <section
+            className={`mb-12 print:mb-0 ${
+              config.includeExecutiveNarrative || config.includeRoadmap
+                ? 'print-page-break-before'
+                : ''
+            }`}
+          >
+            <div className="print-break-inside-avoid">
+              <div className="flex items-baseline gap-2.5 mb-5 print:mb-3 pb-2.5 border-b border-[#e8eff1] print-break-after-avoid">
+                <span className="text-xs font-mono font-bold text-[#00afa9]">03.</span>
+                <h2 className="text-xl font-black text-[#096475]">
+                  Visualisations interactives & analyse par compétence
+                </h2>
               </div>
 
-              <div className="lg:col-span-5 rounded-2xl border border-[#e5ecee] bg-white p-5">
-                <ModuleComparisonChart modules={analysis.modules} />
-              </div>
-            </div>
-
-            {/* Automated Module & Transfer Prose */}
-            <div className="rounded-2xl border border-[#e5ecee] bg-[#f8fbfb] p-5 sm:p-6 mb-6 space-y-3 text-sm text-[#334155] leading-relaxed">
-              <div>
-                <h4 className="text-sm font-black text-[#096475] mb-1">
-                  Analyse automatisée des piliers J1–J4
-                </h4>
-                <p>{analysis.moduleNarrative}</p>
-              </div>
-              {analysis.transferNarrative && (
-                <div className="pt-3 border-t border-[#e5ecee]">
-                  <h4 className="text-sm font-black text-[#096475] mb-1">
-                    Transfert pratique & posture terrain
-                  </h4>
-                  <p>{analysis.transferNarrative}</p>
+              {/* Chart 1 & 2 */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 print-grid-12 gap-6 print:gap-4 mb-6 print:mb-4">
+                <div className="lg:col-span-7 print-col-span-7 rounded-2xl border border-[#e5ecee] bg-white p-5 print-compact-card">
+                  <ProgressionSlopeChart
+                    analyses={analysis.learnerAnalyses}
+                    selectedEmail={selectedEmail}
+                    onSelectLearner={handleSelectLearner}
+                  />
                 </div>
-              )}
+
+                <div className="lg:col-span-5 print-col-span-5 rounded-2xl border border-[#e5ecee] bg-white p-5 print-compact-card">
+                  <ModuleComparisonChart modules={analysis.modules} />
+                </div>
+              </div>
+
+              {/* Automated Module & Transfer Prose */}
+              <div className="rounded-2xl border border-[#e5ecee] bg-[#f8fbfb] p-5 sm:p-6 print-compact-card mb-6 print:mb-0 space-y-3 text-sm text-[#334155] leading-relaxed">
+                <div>
+                  <h4 className="text-sm font-black text-[#096475] mb-1">
+                    Analyse automatisée des piliers J1–J4
+                  </h4>
+                  <p>{analysis.moduleNarrative}</p>
+                </div>
+                {analysis.transferNarrative && (
+                  <div className="pt-3 border-t border-[#e5ecee]">
+                    <h4 className="text-sm font-black text-[#096475] mb-1">
+                      Transfert pratique & posture terrain
+                    </h4>
+                    <p>{analysis.transferNarrative}</p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Chart 3 & 4 */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-6 rounded-2xl border border-[#e5ecee] bg-white p-5">
+            {/* Chart 3 & 4 (dedicated landscape sheet) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 print-grid-12 gap-6 print:gap-4 print-page-break-before print-break-inside-avoid">
+              <div className="lg:col-span-6 print-col-span-6 rounded-2xl border border-[#e5ecee] bg-white p-5 print-compact-card">
                 <CalibrationQuadrantChart
                   analyses={analysis.learnerAnalyses}
                   onSelectLearner={handleSelectLearner}
                 />
               </div>
 
-              <div className="lg:col-span-6 rounded-2xl border border-[#e5ecee] bg-white p-5 flex flex-col justify-between gap-5">
+              <div className="lg:col-span-6 print-col-span-6 rounded-2xl border border-[#e5ecee] bg-white p-5 print-compact-card flex flex-col justify-between gap-5">
                 <VerdictDistributionChart
                   buckets={analysis.verdictDistribution}
                   total={analysis.total}
@@ -608,10 +616,18 @@ export const ReportView: React.FC<Props> = ({
           </section>
         )}
 
-        {/* 04. BILANS INDIVIDUELS NARRATIFS */}
+        {/* 04. BILANS INDIVIDUELS NARRATIFS (1 feuille dédiée par apprenant en PDF) */}
         {config.includeIndividualNarratives && (
-          <section className="mb-12">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-5 pb-2.5 border-b border-[#e8eff1]">
+          <section
+            className={`mb-12 print:mb-0 ${
+              config.includeExecutiveNarrative ||
+              config.includeRoadmap ||
+              config.includeCharts
+                ? 'print-page-break-before'
+                : ''
+            }`}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-5 print:mb-3 pb-2.5 border-b border-[#e8eff1] print-break-after-avoid">
               <div className="flex items-baseline gap-2.5">
                 <span className="text-xs font-mono font-bold text-[#00afa9]">04.</span>
                 <h2 className="text-xl font-black text-[#096475]">
@@ -643,8 +659,8 @@ export const ReportView: React.FC<Props> = ({
               </div>
             </div>
 
-            <div className="space-y-6">
-              {filteredLearners.map((item) => {
+            <div className="space-y-6 print:space-y-0">
+              {filteredLearners.map((item, idx) => {
                 const style = verdictStyle(item.verdictCategory);
                 const isSelected = selectedEmail === item.emailKey;
                 const obs = item.observation;
@@ -658,14 +674,16 @@ export const ReportView: React.FC<Props> = ({
                     ref={(el) => {
                       learnerRefs.current[item.emailKey] = el;
                     }}
-                    className={`rounded-2xl border p-6 transition-colors print-break-inside-avoid ${
+                    className={`rounded-2xl border p-6 print-compact-card transition-colors print-break-inside-avoid ${
+                      idx > 0 ? 'print-page-break-before' : ''
+                    } ${
                       isSelected
                         ? 'border-[#00afa9] bg-[#fcffff]'
                         : 'border-[#e1e9eb] bg-white'
                     }`}
                   >
                     {/* Header Row */}
-                    <div className="flex flex-wrap items-start justify-between gap-4 pb-4 mb-5 border-b border-[#edf2f3]">
+                    <div className="flex flex-wrap items-start justify-between gap-4 pb-4 print:pb-3 mb-5 print:mb-3 border-b border-[#edf2f3]">
                       <div>
                         <h3 className="text-lg font-black text-[#096475]">
                           {item.learner.name || '—'}
@@ -694,7 +712,7 @@ export const ReportView: React.FC<Props> = ({
                     </div>
 
                     {/* Numeric Summary Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 print-grid-4 gap-3 mb-5 print:mb-3">
                       <div className="rounded-xl bg-[#f6f9fa] p-3">
                         <div className="text-[11px] text-[#6d7d83] font-semibold">Pré-quiz</div>
                         <div className="text-xl font-black text-[#1d2b30] font-mono tabular-nums">
@@ -751,7 +769,7 @@ export const ReportView: React.FC<Props> = ({
 
                     {/* Per-Module Mini Progress Bars (J1-J4) */}
                     {item.moduleScores.some((m) => m.postPct !== null) && (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 print-grid-4 gap-3 mb-5 print:mb-3">
                         {item.moduleScores.map((m) => (
                           <div
                             key={m.key}
@@ -791,7 +809,7 @@ export const ReportView: React.FC<Props> = ({
 
                     {/* Quiz Axes */}
                     {(item.preAxes.length > 0 || item.finalAxes.length > 0) && (
-                      <div className="mt-4 pt-4 border-t border-[#edf2f3] grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div className="mt-4 print:mt-3 pt-4 print:pt-3 border-t border-[#edf2f3] grid grid-cols-1 md:grid-cols-2 print-grid-2 gap-4 text-xs">
                         {item.preAxes.length > 0 && (
                           <div>
                             <div className="font-bold text-[#6d7d83] mb-1">
@@ -821,25 +839,25 @@ export const ReportView: React.FC<Props> = ({
 
                     {/* Trainer Observations */}
                     {hasObs && (
-                      <div className="mt-4 pt-4 border-t border-[#edf2f3]">
-                        <div className="text-xs font-black text-[#096475] mb-2.5">
+                      <div className="mt-4 print:mt-3 pt-4 print:pt-3 border-t border-[#edf2f3]">
+                        <div className="text-xs font-black text-[#096475] mb-2.5 print:mb-2">
                           Observations terrain du formateur
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-[#334155]">
+                        <div className="grid grid-cols-1 md:grid-cols-2 print-grid-2 gap-3 print:gap-2.5 text-xs text-[#334155]">
                           {obs.participation && (
-                            <div className="rounded-lg bg-[#fafcfd] border border-[#edf2f3] p-3">
+                            <div className="rounded-lg bg-[#fafcfd] border border-[#edf2f3] p-3 print:p-2.5">
                               <div className="font-bold text-[#47585e] mb-0.5">Participation</div>
                               <p>{obs.participation}</p>
                             </div>
                           )}
                           {obs.forces && (
-                            <div className="rounded-lg bg-[#f4faf9] border border-[#dceeed] p-3">
+                            <div className="rounded-lg bg-[#f4faf9] border border-[#dceeed] p-3 print:p-2.5">
                               <div className="font-bold text-[#096475] mb-0.5">Points forts</div>
                               <p>{obs.forces}</p>
                             </div>
                           )}
                           {obs.axes && (
-                            <div className="rounded-lg bg-[#fffbf2] border border-[#f5e7c2] p-3">
+                            <div className="rounded-lg bg-[#fffbf2] border border-[#f5e7c2] p-3 print:p-2.5">
                               <div className="font-bold text-[#9a5400] mb-0.5">
                                 Axes à travailler
                               </div>
@@ -847,7 +865,7 @@ export const ReportView: React.FC<Props> = ({
                             </div>
                           )}
                           {obs.engagement && (
-                            <div className="rounded-lg bg-[#fafcfd] border border-[#edf2f3] p-3">
+                            <div className="rounded-lg bg-[#fafcfd] border border-[#edf2f3] p-3 print:p-2.5">
                               <div className="font-bold text-[#47585e] mb-0.5">
                                 Engagement final
                               </div>
@@ -855,7 +873,7 @@ export const ReportView: React.FC<Props> = ({
                             </div>
                           )}
                           {obs.global && (
-                            <div className="md:col-span-2 rounded-lg bg-[#f6f9fa] border border-[#e1e9eb] p-3">
+                            <div className="md:col-span-2 print-col-span-2 rounded-lg bg-[#f6f9fa] border border-[#e1e9eb] p-3 print:p-2.5">
                               <div className="font-bold text-[#096475] mb-0.5">
                                 Synthèse formateur
                               </div>
@@ -874,8 +892,17 @@ export const ReportView: React.FC<Props> = ({
 
         {/* 05. RECOMMANDATIONS MANAGÉRIALES & ACCOMPAGNEMENT */}
         {config.includeActionPlan && (
-          <section className="print-break-inside-avoid">
-            <div className="flex items-baseline gap-2.5 mb-5 pb-2.5 border-b border-[#e8eff1]">
+          <section
+            className={`print-break-inside-avoid ${
+              config.includeExecutiveNarrative ||
+              config.includeRoadmap ||
+              config.includeCharts ||
+              config.includeIndividualNarratives
+                ? 'print-page-break-before'
+                : ''
+            }`}
+          >
+            <div className="flex items-baseline gap-2.5 mb-5 print:mb-4 pb-2.5 border-b border-[#e8eff1] print-break-after-avoid">
               <span className="text-xs font-mono font-bold text-[#00afa9]">05.</span>
               <h2 className="text-xl font-black text-[#096475]">
                 Recommandations managériales & accompagnement
@@ -883,7 +910,7 @@ export const ReportView: React.FC<Props> = ({
             </div>
 
             <div
-              className={`grid grid-cols-1 gap-4 ${
+              className={`grid grid-cols-1 print-grid-2 gap-4 ${
                 analysis.recommendations.length >= 4
                   ? 'md:grid-cols-2'
                   : 'md:grid-cols-3'
@@ -892,7 +919,7 @@ export const ReportView: React.FC<Props> = ({
               {analysis.recommendations.map((rec, idx) => (
                 <div
                   key={idx}
-                  className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-5 flex flex-col justify-between"
+                  className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-5 print-compact-card flex flex-col justify-between print-break-inside-avoid"
                 >
                   <div>
                     <div
@@ -925,7 +952,7 @@ export const ReportView: React.FC<Props> = ({
         )}
 
         {/* Footer */}
-        <footer className="mt-12 pt-6 border-t border-[#e1e9eb] flex flex-wrap items-center justify-between gap-2 text-xs text-[#6d7d83]">
+        <footer className="mt-12 print:mt-6 pt-6 print:pt-4 border-t border-[#e1e9eb] flex flex-wrap items-center justify-between gap-2 text-xs text-[#6d7d83] print-break-inside-avoid">
           <span>Connecteo · Chaque expérience est unique</span>
           <span>Rapport généré automatiquement · {today}</span>
         </footer>

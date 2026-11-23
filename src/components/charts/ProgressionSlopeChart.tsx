@@ -57,10 +57,10 @@ export const ProgressionSlopeChart: React.FC<Props> = ({
         </div>
       </div>
 
-      <div className="w-full overflow-x-auto">
+      <div className="w-full overflow-x-auto print:overflow-visible">
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="w-full h-auto min-w-[520px] select-none"
+          className="w-full h-auto min-w-[520px] print-svg-fit select-none"
           role="img"
           aria-label="Graphique de progression individuelle du pré-quiz au quiz final"
         >
@@ -235,6 +235,8 @@ export const ProgressionSlopeChart: React.FC<Props> = ({
                     ? `${item.progression >= 0 ? '+' : ''}${item.progression} pts`
                     : item.hasPost
                     ? `${item.postPct}%`
+                    : item.verdictCategory === 'pending'
+                    ? 'J5 att.'
                     : '—'}
                 </text>
               </g>
@@ -251,11 +253,18 @@ export const ProgressionSlopeChart: React.FC<Props> = ({
             <span className="text-[#47585e] font-mono tabular-nums">
               Pré-quiz : <strong>{hovered.hasPre ? `${hovered.prePct}%` : '—'}</strong> · Final :{' '}
               <strong>{hovered.hasPost ? `${hovered.postPct}%` : '—'}</strong>
-              {hovered.hasSim ? ` · Simulation : ${hovered.simPct}%` : ''} · Évolution :{' '}
-              <strong className={hovered.progression >= 0 ? 'text-[#096475]' : 'text-[#c62828]'}>
-                {hovered.progression >= 0 ? '+' : ''}
-                {hovered.progression} pts
-              </strong>
+              {hovered.hasSim ? ` · Simulation : ${hovered.simPct}%` : ''} ·{' '}
+              {hovered.hasPre && hovered.hasPost ? (
+                <>
+                  Évolution :{' '}
+                  <strong className={hovered.progression >= 0 ? 'text-[#096475]' : 'text-[#c62828]'}>
+                    {hovered.progression >= 0 ? '+' : ''}
+                    {hovered.progression} pts
+                  </strong>
+                </>
+              ) : (
+                <strong>Quiz final & évaluation en attente (reprise Groupe 2)</strong>
+              )}
             </span>
           </>
         ) : (
