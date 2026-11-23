@@ -217,7 +217,7 @@ export function analyzeLearner(learner: Learner, observations: ObservationsMap):
     );
   } else if (hasPost) {
     narrativeParts.push(
-      `${name}${introFragments ? ` (${introFragments})` : ''} obtient un score de ${postPct}% à l’évaluation finale de certification.`
+      `${name}${introFragments ? ` (${introFragments})` : ''} obtient un score de ${postPct}% à l’évaluation finale.`
     );
   }
 
@@ -409,7 +409,7 @@ export function analyzeCohort(
     if (validationRate >= 85 && progression >= 15) {
       executiveHeadline = `Une montée en compétence remarquable : ${validationRate}% de validation et +${progression} points de progression moyenne.`;
     } else if (validationRate >= 75) {
-      executiveHeadline = `Une promotion opérationnelle : ${validationRate}% des apprenants atteignent le seuil de certification.`;
+      executiveHeadline = `Une promotion opérationnelle : ${validationRate}% des apprenants atteignent le seuil de validation.`;
     } else {
       executiveHeadline = `Une progression collective engagée (+${progression} pts), avec un accompagnement ciblé à poursuivre sur le terrain.`;
     }
@@ -445,7 +445,7 @@ export function analyzeCohort(
   let moduleNarrative =
     'Les scores détaillés par module (J1 à J4) ne sont pas encore renseignés pour cette sélection.';
   if (strongestModule && biggestGainModule && reinforcementModule) {
-    moduleNarrative = `L’analyse transversale des quatre piliers pédagogiques montre une performance maximale sur « ${strongestModule.title} » avec une moyenne finale de ${strongestModule.postPct}%. La dynamique de progression la plus marquée concerne « ${biggestGainModule.title} » (${biggestGainModule.delta >= 0 ? '+' : ''}${biggestGainModule.delta} points entre le pré-quiz et la certification). À l’inverse, « ${reinforcementModule.title} » (${reinforcementModule.postPct}% en moyenne) demeure le levier prioritaire à consolider lors des briefings d’équipe post-formation.`;
+    moduleNarrative = `L’analyse transversale des quatre piliers pédagogiques montre une performance maximale sur « ${strongestModule.title} » avec une moyenne finale de ${strongestModule.postPct}%. La dynamique de progression la plus marquée concerne « ${biggestGainModule.title} » (${biggestGainModule.delta >= 0 ? '+' : ''}${biggestGainModule.delta} points entre le pré-quiz et l’évaluation finale). À l’inverse, « ${reinforcementModule.title} » (${reinforcementModule.postPct}% en moyenne) demeure le levier prioritaire à consolider lors des briefings d’équipe post-formation.`;
   }
 
   // Transfer narrative (Simulation & Axes)
@@ -469,7 +469,7 @@ export function analyzeCohort(
   // Pull quote
   const pullQuote =
     withFinalCount > 0
-      ? `« Sur l’ensemble du parcours, le groupe gagne ${progression >= 0 ? '+' : ''}${progression} points de maîtrise et porte ${validationRate}% des conseillers au-dessus du seuil opérationnel de certification. »`
+      ? `« Sur l’ensemble du parcours, le groupe gagne ${progression >= 0 ? '+' : ''}${progression} points de maîtrise et porte ${validationRate}% des conseillers au-dessus du seuil de validation opérationnelle. »`
       : '« Chaque expérience est unique : l’évaluation continue transforme les réflexes quotidiens en valeur durable pour le client. »';
 
   // Recommendations J+30
