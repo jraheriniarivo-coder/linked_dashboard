@@ -25,7 +25,7 @@ const DEFAULT_REPORT_CONFIG: ReportConfig = {
   reportTitle: 'Formation Recouvrement — Bilan 5 jours',
   clientName: '',
   facilitator: 'Joatina Dylan RAHERINIARIVO',
-  programTag: 'Connecteo 2026 · Parcours Certifiant',
+  programTag: 'Connecteo 2026 · Parcours Opérationnel',
   customIntro: '',
   includeExecutiveNarrative: true,
   includeRoadmap: true,
@@ -69,10 +69,14 @@ export default function App() {
     () => localStorage.getItem(WAVE_KEY) || 'all'
   );
 
-  const [reportConfig, setReportConfig] = useState<ReportConfig>(() => ({
-    ...DEFAULT_REPORT_CONFIG,
-    ...readJsonStorage<Partial<ReportConfig>>(CONFIG_KEY, {}),
-  }));
+  const [reportConfig, setReportConfig] = useState<ReportConfig>(() => {
+    const saved = readJsonStorage<Partial<ReportConfig>>(CONFIG_KEY, {});
+    const merged = { ...DEFAULT_REPORT_CONFIG, ...saved };
+    if (merged.programTag === 'Connecteo 2026 · Parcours Certifiant') {
+      merged.programTag = DEFAULT_REPORT_CONFIG.programTag;
+    }
+    return merged;
+  });
 
   const [activeTab, setActiveTab] = useState<TabId>('report');
   const [focusedEmail, setFocusedEmail] = useState<string | null>(null);
