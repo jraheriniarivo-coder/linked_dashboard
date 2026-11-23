@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Clock,
   Download,
   FileText,
   Printer,
@@ -155,6 +156,13 @@ export const ReportView: React.FC<Props> = ({
           border: 'border-[#f5dfa9]',
           icon: <TrendingUp className="w-3.5 h-3.5 text-[#b45309]" />,
         };
+      case 'pending':
+        return {
+          text: 'text-[#47585e]',
+          bg: 'bg-[#f4f7f8]',
+          border: 'border-[#cbd5e1]',
+          icon: <Clock className="w-3.5 h-3.5 text-[#64748b]" />,
+        };
       default:
         return {
           text: 'text-[#b91c1c]',
@@ -175,7 +183,7 @@ export const ReportView: React.FC<Props> = ({
               Éditeur & prévisualisation du rapport client
             </h2>
             <p className="text-xs text-[#6d7d83] mt-0.5">
-              Narration automatisée, graphiques interactifs et recommandations J+30 prêts pour diffusion client ou export PDF.
+              Narration automatisée, graphiques interactifs, recommandations et accompagnement prêts pour diffusion client ou export PDF.
             </p>
           </div>
 
@@ -311,15 +319,6 @@ export const ReportView: React.FC<Props> = ({
               <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={config.includeActionPlan}
-                  onChange={(e) => onUpdateConfig({ includeActionPlan: e.target.checked })}
-                  className="accent-[#00afa9]"
-                />
-                Recommandations J+30
-              </label>
-              <label className="inline-flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
                   checked={config.includeIndividualNarratives}
                   onChange={(e) =>
                     onUpdateConfig({ includeIndividualNarratives: e.target.checked })
@@ -327,6 +326,15 @@ export const ReportView: React.FC<Props> = ({
                   className="accent-[#00afa9]"
                 />
                 Bilans individuels
+              </label>
+              <label className="inline-flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={config.includeActionPlan}
+                  onChange={(e) => onUpdateConfig({ includeActionPlan: e.target.checked })}
+                  className="accent-[#00afa9]"
+                />
+                Recommandations & accompagnement
               </label>
             </div>
           </div>
@@ -600,56 +608,12 @@ export const ReportView: React.FC<Props> = ({
           </section>
         )}
 
-        {/* 04. RECOMMANDATIONS MANAGÉRIALES & SUIVI J+30 */}
-        {config.includeActionPlan && (
-          <section className="mb-12 print-break-inside-avoid">
-            <div className="flex items-baseline gap-2.5 mb-5 pb-2.5 border-b border-[#e8eff1]">
-              <span className="text-xs font-mono font-bold text-[#00afa9]">04.</span>
-              <h2 className="text-xl font-black text-[#096475]">
-                Recommandations managériales & plan d’ancrage J+30
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {analysis.recommendations.map((rec, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div
-                      className={`text-xs font-bold mb-1.5 ${
-                        rec.priority === 'Priorité haute'
-                          ? 'text-[#c62828]'
-                          : rec.priority === 'Consolidation'
-                          ? 'text-[#b45309]'
-                          : 'text-[#008c87]'
-                      }`}
-                    >
-                      {rec.priority}
-                    </div>
-                    <h3 className="text-base font-black text-[#096475] mb-2">
-                      {rec.title}
-                    </h3>
-                    <p className="text-xs text-[#52636a] leading-relaxed mb-3">
-                      {rec.rationale}
-                    </p>
-                  </div>
-                  <div className="pt-3 border-t border-[#e5ecee] text-xs text-[#1d2b30] leading-relaxed">
-                    <strong className="text-[#096475]">Action :</strong> {rec.action}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* 05. BILANS INDIVIDUELS NARRATIFS */}
+        {/* 04. BILANS INDIVIDUELS NARRATIFS */}
         {config.includeIndividualNarratives && (
-          <section>
+          <section className="mb-12">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-5 pb-2.5 border-b border-[#e8eff1]">
               <div className="flex items-baseline gap-2.5">
-                <span className="text-xs font-mono font-bold text-[#00afa9]">05.</span>
+                <span className="text-xs font-mono font-bold text-[#00afa9]">04.</span>
                 <h2 className="text-xl font-black text-[#096475]">
                   Bilans individuels narratifs ({filteredLearners.length})
                 </h2>
@@ -718,7 +682,10 @@ export const ReportView: React.FC<Props> = ({
                           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md border text-xs font-bold ${style.bg} ${style.border} ${style.text}`}
                         >
                           {style.icon}
-                          {item.learner.verdict || 'Évaluation'}
+                          {item.learner.verdict ||
+                            (item.verdictCategory === 'pending'
+                              ? 'Finalisation J5 attendue'
+                              : 'Évaluation')}
                         </span>
                         <span className="text-[11px] font-semibold text-[#6d7d83]">
                           {item.trajectoryTag}
@@ -743,7 +710,11 @@ export const ReportView: React.FC<Props> = ({
                         <div className="text-xl font-black text-[#096475] font-mono tabular-nums">
                           {item.hasPost ? `${item.postPct}%` : '—'}
                         </div>
-                        <div className="text-[11px] text-[#6d7d83]">Seuil requis : 60%</div>
+                        <div className="text-[11px] text-[#6d7d83]">
+                          {item.verdictCategory === 'pending'
+                            ? 'Reprise prévue J5 (Gr. 2)'
+                            : 'Seuil requis : 60%'}
+                        </div>
                       </div>
 
                       <div className="rounded-xl bg-[#f6f9fa] p-3">
@@ -770,7 +741,10 @@ export const ReportView: React.FC<Props> = ({
                           {item.hasSim ? `${item.simPct}%` : '—'}
                         </div>
                         <div className="text-[11px] text-[#6d7d83] truncate">
-                          {item.learner.sim_verdict || 'Non renseignée'}
+                          {item.learner.sim_verdict ||
+                            (item.verdictCategory === 'pending'
+                              ? 'À passer avec le Groupe 2'
+                              : 'Non renseignée')}
                         </div>
                       </div>
                     </div>
@@ -808,7 +782,7 @@ export const ReportView: React.FC<Props> = ({
                     <div className="space-y-2.5 text-sm text-[#334155] leading-relaxed">
                       <p>{item.automatedSummary}</p>
                       <p className="text-xs font-semibold text-[#096475] bg-[#f3f9f9] rounded-lg px-3.5 py-2.5 border border-[#dcecec]">
-                        Suite opérationnelle recommandée :{' '}
+                        Observation :{' '}
                         <span className="font-normal text-[#1d2b30]">
                           {item.operationalAdvice}
                         </span>
@@ -894,6 +868,58 @@ export const ReportView: React.FC<Props> = ({
                   </article>
                 );
               })}
+            </div>
+          </section>
+        )}
+
+        {/* 05. RECOMMANDATIONS MANAGÉRIALES & ACCOMPAGNEMENT */}
+        {config.includeActionPlan && (
+          <section className="print-break-inside-avoid">
+            <div className="flex items-baseline gap-2.5 mb-5 pb-2.5 border-b border-[#e8eff1]">
+              <span className="text-xs font-mono font-bold text-[#00afa9]">05.</span>
+              <h2 className="text-xl font-black text-[#096475]">
+                Recommandations managériales & accompagnement
+              </h2>
+            </div>
+
+            <div
+              className={`grid grid-cols-1 gap-4 ${
+                analysis.recommendations.length >= 4
+                  ? 'md:grid-cols-2'
+                  : 'md:grid-cols-3'
+              }`}
+            >
+              {analysis.recommendations.map((rec, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-5 flex flex-col justify-between"
+                >
+                  <div>
+                    <div
+                      className={`text-xs font-bold mb-1.5 ${
+                        rec.priority === 'Priorité haute'
+                          ? 'text-[#c62828]'
+                          : rec.priority === 'Planification J5'
+                          ? 'text-[#096475]'
+                          : rec.priority === 'Consolidation'
+                          ? 'text-[#b45309]'
+                          : 'text-[#008c87]'
+                      }`}
+                    >
+                      {rec.priority}
+                    </div>
+                    <h3 className="text-base font-black text-[#096475] mb-2">
+                      {rec.title}
+                    </h3>
+                    <p className="text-xs text-[#52636a] leading-relaxed mb-3">
+                      {rec.rationale}
+                    </p>
+                  </div>
+                  <div className="pt-3 border-t border-[#e5ecee] text-xs text-[#1d2b30] leading-relaxed">
+                    <strong className="text-[#096475]">Action :</strong> {rec.action}
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
         )}
