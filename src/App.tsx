@@ -20,32 +20,7 @@ const OBS_KEY = `${STORAGE_KEY}_obs`;
 const WAVE_KEY = `${STORAGE_KEY}_wave`;
 const CONFIG_KEY = `${STORAGE_KEY}_report_cfg`;
 const INIT_KEY = `${STORAGE_KEY}_initialized`;
-const HUB_RETURN_KEY = 'connecteo_hub_return_url';
-
-function resolveHubReturnUrl(): string {
-  try {
-    if (typeof window === 'undefined') return 'https://le-recouvrement.vercel.app/index.html';
-    const ref = document.referrer;
-    if (ref) {
-      const refUrl = new URL(ref);
-      const currentPath = window.location.pathname
-        .toLowerCase()
-        .replace(/\/index\.html$/, '/');
-      const refPath = refUrl.pathname
-        .toLowerCase()
-        .replace(/\/index\.html$/, '/');
-      if (refUrl.origin === window.location.origin && refPath !== currentPath) {
-        sessionStorage.setItem(HUB_RETURN_KEY, ref);
-        return ref;
-      }
-    }
-    const stored = sessionStorage.getItem(HUB_RETURN_KEY);
-    if (stored) return stored;
-  } catch {
-    // Ignore URL or sessionStorage access errors
-  }
-  return 'https://le-recouvrement.vercel.app/index.html';
-}
+const HUB_RETURN_URL = 'https://le-recouvrement.vercel.app/index.html';
 
 const DEFAULT_REPORT_CONFIG: ReportConfig = {
   reportTitle: 'Formation Recouvrement — Bilan 5 jours',
@@ -106,7 +81,6 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState<TabId>('report');
   const [focusedEmail, setFocusedEmail] = useState<string | null>(null);
-  const [hubReturnUrl] = useState<string>(() => resolveHubReturnUrl());
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(learners));
@@ -366,7 +340,7 @@ export default function App() {
           {/* Zone 3: Back to Hub (index.html) */}
           <div className="flex items-center gap-2 shrink-0">
             <a
-              href={hubReturnUrl}
+              href={HUB_RETURN_URL}
               title="Retour vers le Hub Connecteo (index.html)"
               aria-label="Retour vers index.html"
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white text-[#096475] text-xs sm:text-sm font-bold hover:bg-[#eef9f9] transition-colors whitespace-nowrap shrink-0 shadow-xs"
