@@ -55,7 +55,7 @@ const ROADMAP_DAYS = [
   },
   {
     day: 'Jour 5',
-    title: 'Certification',
+    title: 'Évaluation finale',
     summary: 'Consolidation des acquis, simulations évaluées, plan d’action et engagement individuel.',
   },
 ];
@@ -413,7 +413,7 @@ export const ReportView: React.FC<Props> = ({
               </div>
 
               <div className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-4">
-                <div className="text-xs text-[#6d7d83] font-semibold">Score certification</div>
+                <div className="text-xs text-[#6d7d83] font-semibold">Évaluation finale</div>
                 <div className="text-2xl font-black text-[#096475] font-mono tabular-nums mt-1">
                   {analysis.postAvg}%
                 </div>
@@ -443,7 +443,7 @@ export const ReportView: React.FC<Props> = ({
                   {analysis.validationRate}%
                 </div>
                 <div className="text-[11px] text-[#6d7d83] mt-0.5">
-                  {analysis.passedCount}/{analysis.withFinalCount} certifiés
+                  {analysis.passedCount}/{analysis.withFinalCount} validés
                 </div>
               </div>
 
@@ -833,7 +833,7 @@ export const ReportView: React.FC<Props> = ({
                         {item.finalAxes.length > 0 && (
                           <div>
                             <div className="font-bold text-[#096475] mb-1">
-                              Axes résiduels après certification
+                              Axes résiduels post-formation
                             </div>
                             <ul className="list-disc pl-4 space-y-0.5 text-[#1d2b30]">
                               {item.finalAxes.map((ax, idx) => (
