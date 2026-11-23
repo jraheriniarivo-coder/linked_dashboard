@@ -78,8 +78,16 @@ export function parseFractionPct(raw?: string): number | null {
   return null;
 }
 
-export function getVerdictCategory(verdict?: string, postPct = 0): VerdictCategory {
+export function getVerdictCategory(
+  verdict?: string,
+  postPct = 0,
+  hasPost = true,
+  hasSim = true
+): VerdictCategory {
   const v = (verdict || '').toLowerCase();
+  if (v.includes('attente') || v.includes('absent') || v.includes('reprise') || v.includes('finaliser')) {
+    return 'pending';
+  }
   if (v.includes('expert')) return 'expert';
   if (v.includes('maîtrise') || v.includes('maitrise') || v.includes('avancé') || v.includes('avance') || v.includes('acquis')) {
     if (v.includes('non acquis')) return 'renforcer';
@@ -91,6 +99,7 @@ export function getVerdictCategory(verdict?: string, postPct = 0): VerdictCatego
   if (v.includes('renforcer') || v.includes('débutant') || v.includes('debutant') || v.includes('non acquis')) {
     return 'renforcer';
   }
+  if (!hasPost && !hasSim) return 'pending';
   if (postPct >= 85) return 'expert';
   if (postPct >= 75) return 'maitrise';
   if (postPct >= 60) return 'consolidation';
@@ -150,7 +159,7 @@ export function analyzeLearner(learner: Learner, observations: ObservationsMap):
     }
   }
 
-  let trajectoryTag = 'Évaluation en attente';
+  let trajectoryTag = 'Quiz final & évaluation en attente';
   if (hasPre && hasPost) {
     if (progression >= 22) trajectoryTag = 'Progression accélérée';
     else if (progression >= 12) trajectoryTag = 'Montée en compétence solide';
@@ -158,6 +167,8 @@ export function analyzeLearner(learner: Learner, observations: ObservationsMap):
     else if (progression >= 1) trajectoryTag = 'Progression régulière';
     else if (progression === 0 && postPct >= 80) trajectoryTag = 'Acquis élevés maintenus';
     else trajectoryTag = 'Vigilance pédagogique';
+  } else if (hasPost) {
+    trajectoryTag = 'Évaluation finale complétée';
   }
 
   const moduleScores: LearnerModuleScore[] = TRAINING_MODULES.map((mod) => {
@@ -188,44 +199,52 @@ export function analyzeLearner(learner: Learner, observations: ObservationsMap):
   const finalAxes = splitAxes(learner.axes_amelioration);
   const resolvedAxesCount = Math.max(0, preAxes.length - finalAxes.length);
 
-  const verdictCategory = getVerdictCategory(learner.verdict, postPct);
+  const verdictCategory = getVerdictCategory(learner.verdict, postPct, hasPost, hasSim);
   const name = learner.name || 'Cet apprenant';
   const seniorityTxt = learner.seniority ? `avec une ancienneté de ${learner.seniority.toLowerCase()}` : '';
   const priorTxt =
     learner.deja_formation_rc === 'Oui'
-      ? 'disposant déjà d’un premier vernis en relation client'
+      ? 'ayant déjà suivi une formation relation client par le passé'
       : learner.deja_formation_rc === 'Non'
-      ? 'sans formation préalable en relation client'
+      ? 'formé(e) jusqu’ici par la pratique terrain sans cursus RC formalisé'
       : '';
 
   const introFragments = [seniorityTxt, priorTxt].filter(Boolean).join(' et ');
 
   let narrativeParts: string[] = [];
 
-  if (hasPre && hasPost) {
+  if (verdictCategory === 'pending') {
+    narrativeParts.push(
+      `${name}${introFragments ? ` (${introFragments})` : ''} — déjà actif(ve) en production sur la campagne de recouvrement — n’a pas encore pu passer le quiz final ni l’évaluation pratique de fin de parcours${
+        hasPre
+          ? ` (niveau initial mesuré au pré-quiz à ${prePct}%${hasSelfEval ? `, auto-évaluation à ${selfEvalPct}%` : ''})`
+          : ''
+      }. Sa session de rattrapage est prévue lorsque le deuxième groupe atteindra le dernier jour de formation afin de finaliser son parcours en bonne et due forme.`
+    );
+  } else if (hasPre && hasPost) {
     const calibrationNote =
       calibrationGap !== null
         ? calibrationGap > 10
-          ? ` Son auto-évaluation initiale (${selfEvalPct}%) dépassait son score réel de départ (${prePct}%), un écart que la formation a permis de recadrer objectivement.`
+          ? ` Son auto-évaluation initiale (${selfEvalPct}%) surestimait ses réflexes théoriques face au pré-quiz (${prePct}%), un écart que ce renforcement a permis d’objectiver sur les fondamentaux.`
           : calibrationGap < -10
-          ? ` Sous-estimant ses capacités au départ (${selfEvalPct}% perçus pour ${prePct}% mesurés), son parcours a révélé un potentiel solide.`
-          : ` Son positionnement initial (${selfEvalPct}% estimés pour ${prePct}% mesurés) traduisait déjà une bonne lucidité sur son niveau.`
+          ? ` Sous-estimant ses acquis au départ (${selfEvalPct}% perçus pour ${prePct}% mesurés), ce bilan confirme de solides réflexes déjà ancrés en production.`
+          : ` Son positionnement initial (${selfEvalPct}% estimés pour ${prePct}% mesurés) traduisait déjà une bonne lucidité sur son niveau réel en campagne.`
         : '';
 
     narrativeParts.push(
-      `${name}${introFragments ? ` (${introFragments})` : ''} démarre le cursus à ${prePct}% et atteint ${postPct}% à l’évaluation finale, enregistrant une évolution de ${progression >= 0 ? '+' : ''}${progression} points.${calibrationNote}`
+      `${name}${introFragments ? ` (${introFragments})` : ''} démarre ce renforcement à ${prePct}% et atteint ${postPct}% à l’évaluation finale, enregistrant une évolution de ${progression >= 0 ? '+' : ''}${progression} points.${calibrationNote}`
     );
   } else if (hasPost) {
     narrativeParts.push(
-      `${name}${introFragments ? ` (${introFragments})` : ''} obtient un score de ${postPct}% à l’évaluation finale.`
+      `${name}${introFragments ? ` (${introFragments})` : ''} obtient un score de ${postPct}% à l’évaluation finale de ce parcours de renforcement.`
     );
   }
 
-  if (strongestModule && focusModule && strongestModule.key !== focusModule.key) {
+  if (verdictCategory !== 'pending' && strongestModule && focusModule && strongestModule.key !== focusModule.key) {
     narrativeParts.push(
       `L’analyse par pilier met en évidence une maîtrise particulière sur « ${strongestModule.title} » (${strongestModule.postPct}%${
         strongestModule.delta !== null ? `, soit ${strongestModule.delta >= 0 ? '+' : ''}${strongestModule.delta} pts` : ''
-      }), tandis que « ${focusModule.title} » (${focusModule.postPct}%) constitue la principale marge de progression à court terme.`
+      }), tandis que « ${focusModule.title} » (${focusModule.postPct}%) constitue la principale marge de consolidation en activité.`
     );
   }
 
@@ -233,37 +252,40 @@ export function analyzeLearner(learner: Learner, observations: ObservationsMap):
     const theoryPracticeGap = hasPost ? Math.round(simPct - postPct) : 0;
     if (simPct >= 80) {
       narrativeParts.push(
-        `En simulation d’appel (${simPct}%${learner.sim_verdict ? ` — ${learner.sim_verdict}` : ''}), la transposition opérationnelle des acquis théoriques est pleinement confirmée.`
+        `En simulation d’appel (${simPct}%${learner.sim_verdict ? ` — ${learner.sim_verdict}` : ''}), la transposition des méthodes structurées dans sa pratique quotidienne de recouvrement est pleinement confirmée.`
       );
     } else if (simPct >= 60) {
       narrativeParts.push(
         `La mise en situation pratique (${simPct}%${learner.sim_verdict ? ` — ${learner.sim_verdict}` : ''}) montre une appropriation fonctionnelle${
           theoryPracticeGap < -8
-            ? ', légèrement en retrait par rapport aux acquis théoriques, ce qui invite à multiplier les entraînements vocaux'
-            : ', cohérente avec le niveau théorique observé'
+            ? ', légèrement en retrait par rapport aux acquis théoriques, invitant à surveiller les automatismes vocaux en production'
+            : ', cohérente avec son niveau d’aisance sur le terrain'
         }.`
       );
     } else {
       narrativeParts.push(
-        `Le score en simulation (${simPct}%${learner.sim_verdict ? ` — ${learner.sim_verdict}` : ''}) indique que le passage à l’acte téléphonique reste fragile et requiert un accompagnement guidé dès la prise de poste.`
+        `Le score en simulation (${simPct}%${learner.sim_verdict ? ` — ${learner.sim_verdict}` : ''}) indique que certains réflexes ancrés sur le terrain méritent d’être recalibrés en production via un coaching vocal ciblé.`
       );
     }
   }
 
   let operationalAdvice = '';
-  if (verdictCategory === 'expert') {
+  if (verdictCategory === 'pending') {
     operationalAdvice =
-      'Autonomie validée : à mobiliser comme binôme ou référent lors des sessions de double écoute en plateau.';
+      'Parcours à finaliser : intégrer ce conseiller à la dernière journée du Groupe 2 pour passer le quiz final et l’évaluation pratique, tout en poursuivant son activité habituelle sur le plateau.';
+  } else if (verdictCategory === 'expert') {
+    operationalAdvice =
+      'Maîtrise confirmée en production : capitaliser sur son expérience campagne en le mobilisant comme référent ou binôme lors des sessions d’écoute croisée entre pairs.';
   } else if (verdictCategory === 'maitrise') {
     operationalAdvice = finalAxes.length
-      ? `Prêt pour la production autonome avec un point de suivi ciblé à J+15 sur : ${finalAxes[0].toLowerCase()}.`
-      : 'Prêt pour la mise en production avec suivi standard des indicateurs de promesse de paiement.';
+      ? `Acquis consolidés sur le poste : maintenir le niveau de performance en activité avec un point de calibrage à J+15 sur : ${finalAxes[0].toLowerCase()}.`
+      : 'Acquis consolidés sur le poste : poursuivre l’activité en veillant à la régularité des engagements de paiement et à la rigueur du discours.';
   } else if (verdictCategory === 'consolidation') {
     operationalAdvice =
-      'Validation atteinte : programmer un débriefing hebdomadaire sur 2 appels enregistrés durant les 3 premières semaines.';
+      'Renforcement à poursuivre en production : programmer un débriefing hebdomadaire sur 2 appels réels enregistrés durant 3 semaines afin de sécuriser les automatismes.';
   } else {
     operationalAdvice =
-      'Seuil de validation non encore sécurisé : planifier un tutorat rapproché (double écoute quotidienne) et une réévaluation à J+15.';
+      'Recalibrage terrain prioritaire : planifier des séances de double écoute sur appels de production (structure 7 temps / méthode FOS) et un point de contrôle à J+15.';
   }
 
   return {
@@ -369,6 +391,8 @@ export function analyzeCohort(
     ? [...activeModules].sort((a, b) => a.postPct - b.postPct)[0]
     : null;
 
+  const pendingLearners = learnerAnalyses.filter((a) => a.verdictCategory === 'pending');
+
   // Verdict distribution
   const bucketDefs: Array<{ category: VerdictCategory; label: string; color: string }> = [
     { category: 'expert', label: 'Expert', color: '#096475' },
@@ -376,6 +400,14 @@ export function analyzeCohort(
     { category: 'consolidation', label: 'En consolidation', color: '#ffa900' },
     { category: 'renforcer', label: 'À renforcer', color: '#c62828' },
   ];
+
+  if (pendingLearners.length > 0) {
+    bucketDefs.push({
+      category: 'pending',
+      label: 'En attente J5',
+      color: '#64748b',
+    });
+  }
 
   const verdictDistribution: VerdictBucket[] = bucketDefs.map((b) => {
     const count = learnerAnalyses.filter((a) => a.verdictCategory === b.category).length;
@@ -418,14 +450,14 @@ export function analyzeCohort(
   const executiveNarrative: string[] = [];
 
   if (learners.length > 0) {
-    const expSentence = `Composée de ${learners.length} participant${learners.length > 1 ? 's' : ''} (${priorTrainingRate}% ayant déjà suivi une sensibilisation antérieure en relation client), la promotion ${scopeText} affichait un niveau de départ mesuré à ${preAvg}% en pré-quiz.`;
+    const expSentence = `Composée de ${learners.length} conseiller${learners.length > 1 ? 's' : ''} déjà en activité sur la campagne de recouvrement (${priorTrainingRate}% ayant déjà suivi une sensibilisation relation client par le passé), cette promotion ${scopeText} engagée dans un parcours de renforcement de compétences affichait un niveau de départ mesuré à ${preAvg}% en pré-quiz.`;
     const calibSentence =
       calibrationGapAvg !== null
         ? Math.abs(calibrationGapAvg) <= 5
-          ? ` L’auto-évaluation initiale (${selfEvalAvg}%) correspondait fidèlement au niveau réel mesuré, traduisant une bonne lucidité collective dès l’ouverture.`
+          ? ` L’auto-évaluation initiale (${selfEvalAvg}%) correspondait fidèlement au niveau réel mesuré, traduisant une bonne lucidité collective sur les acquis.`
           : calibrationGapAvg > 5
-          ? ` L’auto-évaluation initiale (${selfEvalAvg}%) révélait une légère surévaluation moyenne (+${calibrationGapAvg} pts par rapport au pré-quiz), rapidement réajustée par les mises en situation des premiers jours.`
-          : ` Les participants sous-estimaient initialement leurs acquis (${selfEvalAvg}% perçus contre ${preAvg}% mesurés), ce qui a favorisé un fort regain de confiance tout au long de la semaine.`
+          ? ` L’auto-évaluation initiale (${selfEvalAvg}%) révélait une légère surestimation moyenne (+${calibrationGapAvg} pts par rapport au pré-quiz), liée à la confiance issue de l’habitude terrain et recadrée sur les fondamentaux méthodologiques.`
+          : ` Les conseillers sous-estimaient initialement leurs acquis théoriques (${selfEvalAvg}% perçus contre ${preAvg}% mesurés), ce qui a permis de valoriser et structurer des réflexes déjà présents en production.`
         : '';
     executiveNarrative.push(expSentence + calibSentence);
   }
@@ -433,11 +465,18 @@ export function analyzeCohort(
   if (withFinalCount > 0) {
     const homogeneity =
       spreadPost <= 18
-        ? `L’homogénéité du groupe s’est nettement renforcée en fin de semaine (écart contenu de ${spreadPost} points entre ${minPost}% et ${maxPost}%, médiane à ${medianPost}%).`
-        : `La cohorte conserve une amplitude de niveaux de ${spreadPost} points (de ${minPost}% à ${maxPost}%, médiane à ${medianPost}%), justifiant un pilotage différencié entre profils autonomes et profils juniors.`;
+        ? `L’homogénéité de l’équipe s’est nettement renforcée en fin de semaine (écart contenu de ${spreadPost} points entre ${minPost}% et ${maxPost}%, médiane à ${medianPost}%).`
+        : `La cohorte conserve une amplitude de niveaux de ${spreadPost} points (de ${minPost}% à ${maxPost}%, médiane à ${medianPost}%), justifiant un suivi qualité différencié sur le plateau entre profils référents et conseillers à recalibrer.`;
 
     executiveNarrative.push(
-      `À l’issue des cinq journées, la moyenne finale s’établit à ${postAvg}% (soit ${progression >= 0 ? '+' : ''}${progression} points par rapport au diagnostic initial). ${passedCount} apprenant${passedCount > 1 ? 's' : ''} sur ${withFinalCount} (${validationRate}%) valident les acquis au seuil minimal de 60%, dont ${excellenceCount} (${excellenceRate}%) à un niveau d’excellence (≥ 80%). ${homogeneity}`
+      `À l’issue des cinq journées, la moyenne finale des participants évalués s’établit à ${postAvg}% (soit ${progression >= 0 ? '+' : ''}${progression} points par rapport au diagnostic initial). ${passedCount} conseiller${passedCount > 1 ? 's' : ''} sur ${withFinalCount} (${validationRate}%) valident les acquis au seuil minimal de 60%, dont ${excellenceCount} (${excellenceRate}%) à un niveau d’excellence (≥ 80%). ${homogeneity}`
+    );
+  }
+
+  if (pendingLearners.length > 0) {
+    const pendingNames = pendingLearners.map((a) => a.learner.name || 'Une participante').join(', ');
+    executiveNarrative.push(
+      `Point d’attention administratif et pédagogique : ${pendingNames} n’a pas pu effectuer le quiz final ni l’évaluation pratique en fin de session. Une reprise est prévue dès que le deuxième groupe atteindra le dernier jour de formation afin de lui permettre de finaliser son parcours en bonne et due forme.`
     );
   }
 
@@ -445,7 +484,7 @@ export function analyzeCohort(
   let moduleNarrative =
     'Les scores détaillés par module (J1 à J4) ne sont pas encore renseignés pour cette sélection.';
   if (strongestModule && biggestGainModule && reinforcementModule) {
-    moduleNarrative = `L’analyse transversale des quatre piliers pédagogiques montre une performance maximale sur « ${strongestModule.title} » avec une moyenne finale de ${strongestModule.postPct}%. La dynamique de progression la plus marquée concerne « ${biggestGainModule.title} » (${biggestGainModule.delta >= 0 ? '+' : ''}${biggestGainModule.delta} points entre le pré-quiz et l’évaluation finale). À l’inverse, « ${reinforcementModule.title} » (${reinforcementModule.postPct}% en moyenne) demeure le levier prioritaire à consolider lors des briefings d’équipe post-formation.`;
+    moduleNarrative = `L’analyse transversale des quatre piliers pédagogiques montre une performance maximale sur « ${strongestModule.title} » avec une moyenne finale de ${strongestModule.postPct}%. La dynamique de progression la plus marquée concerne « ${biggestGainModule.title} » (${biggestGainModule.delta >= 0 ? '+' : ''}${biggestGainModule.delta} points entre le pré-quiz et l’évaluation finale). À l’inverse, « ${reinforcementModule.title} » (${reinforcementModule.postPct}% en moyenne) demeure le levier prioritaire à consolider lors des briefings qualité en plateau.`;
   }
 
   // Transfer narrative (Simulation & Axes)
@@ -472,48 +511,59 @@ export function analyzeCohort(
       ? `« Sur l’ensemble du parcours, le groupe gagne ${progression >= 0 ? '+' : ''}${progression} points de maîtrise et porte ${validationRate}% des conseillers au-dessus du seuil de validation opérationnelle. »`
       : '« Chaque expérience est unique : l’évaluation continue transforme les réflexes quotidiens en valeur durable pour le client. »';
 
-  // Recommendations J+30
+  // Recommendations & Accompagnement (tailored to agents already in production + Group 2 J5 retake)
   const recommendations: CohortRecommendation[] = [];
 
   const toReinforce = learnerAnalyses.filter((a) => a.verdictCategory === 'renforcer');
   const experts = learnerAnalyses.filter((a) => a.verdictCategory === 'expert');
 
+  if (pendingLearners.length > 0) {
+    const pendingNames = pendingLearners.map((a) => a.learner.name || 'La participante').join(', ');
+    recommendations.push({
+      priority: 'Planification J5',
+      title: `Reprise du quiz final et de l’évaluation (${pendingNames})`,
+      rationale: `${pendingNames} n’a pas pu passer le quiz final ni l’évaluation pratique en clôture de cette vague ; son bilan reste à finaliser.`,
+      action:
+        'Planifier sa participation à la dernière journée de formation du deuxième groupe pour passer le quiz final et l’évaluation pratique dans les mêmes conditions.',
+    });
+  }
+
   if (toReinforce.length > 0) {
     recommendations.push({
       priority: 'Priorité haute',
-      title: `Tutorat ciblé pour ${toReinforce.length} profil${toReinforce.length > 1 ? 's' : ''} à renforcer`,
-      rationale: `${toReinforce.map((a) => a.learner.name).join(', ')} présente${toReinforce.length > 1 ? 'nt' : ''} un score inférieur au seuil de 60%.`,
+      title: `Recalibrage terrain pour ${toReinforce.length} conseiller${toReinforce.length > 1 ? 's' : ''} en activité`,
+      rationale: `${toReinforce.map((a) => a.learner.name).join(', ')} reste${toReinforce.length > 1 ? 'nt' : ''} sous le seuil de 60%, traduisant des habitudes de campagne à réaligner sur la méthode structurée.`,
       action:
-        'Mettre en place 2 sessions hebdomadaires de double écoute guidée avec grille de débriefing sur les 15 premiers jours de production.',
+        'Mettre en place 2 séances hebdomadaires de double écoute sur leurs appels de production réels avec grille de débriefing (7 temps & méthode FOS) durant 15 jours.',
     });
   }
 
   if (reinforcementModule) {
     recommendations.push({
       priority: 'Consolidation',
-      title: `Atelier flash sur « ${reinforcementModule.title} »`,
-      rationale: `C’est le pilier affichant la moyenne la plus basse de la cohorte (${reinforcementModule.postPct}%), nécessitant un ancrage collectif.`,
+      title: `Atelier flash qualité sur « ${reinforcementModule.title} »`,
+      rationale: `C’est le pilier affichant la moyenne la plus basse de l’équipe (${reinforcementModule.postPct}%), constituant le principal levier de montée en qualité sur la campagne.`,
       action:
-        'Animer un briefing matinal de 20 minutes à J+7 autour de 2 cas réels tirés des enregistrements plateau.',
+        'Animer un débriefing d’équipe de 20 minutes à J+7 à partir de 2 enregistrements réels issus de la production.',
     });
   }
 
   if (experts.length > 0) {
     recommendations.push({
-      priority: 'Ancrage terrain',
-      title: `Mobilisation des ${experts.length} profil${experts.length > 1 ? 's' : ''} Expert en parrainage`,
-      rationale: `${experts.map((a) => a.learner.name).join(', ')} maîtrise${experts.length > 1 ? 'nt' : ''} l’ensemble des fondamentaux et de la posture vocale.`,
+      priority: 'Accompagnement',
+      title: `Accompagnement croisé avec les ${experts.length} conseiller${experts.length > 1 ? 's' : ''} Expert`,
+      rationale: `${experts.map((a) => a.learner.name).join(', ')} allie${experts.length > 1 ? 'nt' : ''} expérience de la campagne et maîtrise exemplaire des techniques de recouvrement.`,
       action:
-        'Associer ces référents aux conseillers en consolidation lors des écoutes croisées pour accélérer la montée en confiance.',
+        'Les associer en binôme avec les collègues en consolidation lors d’écoutes croisées en plateau pour harmoniser les pratiques d’appel.',
     });
   } else {
     recommendations.push({
-      priority: 'Ancrage terrain',
-      title: 'Évaluation à froid et suivi des KPI à J+30',
+      priority: 'Accompagnement',
+      title: 'Accompagnement qualité et suivi des KPI en production',
       rationale:
-        'La rétention des acquis post-formation dépend de la régularité du feedback managérial durant le premier mois.',
+        'Pour des équipes déjà en production, l’enjeu principal est d’éviter le retour aux anciens automatismes après la semaine de renforcement.',
       action:
-        'Planifier un point de contrôle à J+30 croisant la grille qualité d’appel (7 temps / FOS) et le taux de promesses de paiement tenues.',
+        'Mettre en place un accompagnement régulier croisant la grille qualité d’appel (7 temps / FOS) et l’évolution du taux de promesses de paiement tenues.',
     });
   }
 
