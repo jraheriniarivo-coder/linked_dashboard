@@ -544,7 +544,7 @@ export function analyzeCohort(
       title: `Atelier flash qualité sur « ${reinforcementModule.title} »`,
       rationale: `C’est le pilier affichant la moyenne la plus basse de l’équipe (${reinforcementModule.postPct}%), constituant le principal levier de montée en qualité sur la campagne.`,
       action:
-        'Animer un débriefing d’équipe de 20 minutes à J+7 à partir de 2 enregistrements réels issus de la production.',
+        'Animer un débriefing d’équipe de 20 minutes à partir de 2 enregistrements réels issus de la production.',
     });
   }
 
