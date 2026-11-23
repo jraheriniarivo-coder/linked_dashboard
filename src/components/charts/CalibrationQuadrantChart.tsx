@@ -44,7 +44,7 @@ export const CalibrationQuadrantChart: React.FC<Props> = ({
     <div>
       <div className="mb-3">
         <h4 className="text-base font-bold text-[#096475]">
-          Matrice Départ vs Certification
+          Matrice Départ vs Évaluation finale
         </h4>
         <p className="text-xs text-[#6d7d83]">
           Lecture des profils au-dessus de la diagonale d’équilibre (zone de progression nette).
