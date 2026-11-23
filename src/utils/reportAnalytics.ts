@@ -278,14 +278,14 @@ export function analyzeLearner(learner: Learner, observations: ObservationsMap):
       'Maîtrise confirmée en production : capitaliser sur son expérience campagne en le mobilisant comme référent ou binôme lors des sessions d’écoute croisée entre pairs.';
   } else if (verdictCategory === 'maitrise') {
     operationalAdvice = finalAxes.length
-      ? `Acquis consolidés sur le poste : maintenir le niveau de performance en activité avec un point de calibrage à J+15 sur : ${finalAxes[0].toLowerCase()}.`
+      ? `Acquis consolidés sur le poste : maintenir le niveau de performance en activité avec un point de calibrage : ${finalAxes[0].toLowerCase()}.`
       : 'Acquis consolidés sur le poste : poursuivre l’activité en veillant à la régularité des engagements de paiement et à la rigueur du discours.';
   } else if (verdictCategory === 'consolidation') {
     operationalAdvice =
       'Renforcement à poursuivre en production : programmer un débriefing hebdomadaire sur 2 appels réels enregistrés durant 3 semaines afin de sécuriser les automatismes.';
   } else {
     operationalAdvice =
-      'Recalibrage terrain prioritaire : planifier des séances de double écoute sur appels de production (structure 7 temps / méthode FOS) et un point de contrôle à J+15.';
+      'Recalibrage terrain prioritaire : planifier des séances de double écoute sur appels de production (structure 7 temps / méthode FOS) et un point de contrôle.';
   }
 
   return {
