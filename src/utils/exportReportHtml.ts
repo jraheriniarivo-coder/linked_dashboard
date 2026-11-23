@@ -39,7 +39,9 @@ function buildInlineSlopeSvg(analysis: CohortAnalysis): string {
       const delta =
         item.hasPre && item.hasPost
           ? `${item.progression >= 0 ? '+' : ''}${item.progression} pts`
-          : `${item.postPct}%`;
+          : item.hasPost
+          ? `${item.postPct}%`
+          : 'J5 att.';
 
       return `
         <text x="8" y="${cy + 4}" font-size="12" font-weight="600" fill="#1e293b">${name}</text>
@@ -69,6 +71,7 @@ export function buildStandaloneReportHtml(
     maitrise: 'Maîtrise',
     consolidation: 'En consolidation',
     renforcer: 'À renforcer',
+    pending: 'Finalisation J5 attendue',
   };
 
   const modulesHtml = analysis.modules
@@ -116,7 +119,7 @@ export function buildStandaloneReportHtml(
         </div>
 
         ${a.automatedSummary ? `<p style="font-size:14px;color:#334155;margin:0 0 10px;line-height:1.65;">${esc(a.automatedSummary)}</p>` : ''}
-        <p style="font-size:13px;color:#096475;margin:0 0 10px;"><strong>Recommandation opérationnelle :</strong> ${esc(a.operationalAdvice)}</p>
+        <p style="font-size:13px;color:#096475;margin:0 0 10px;"><strong>Observation :</strong> ${esc(a.operationalAdvice)}</p>
 
         ${a.finalAxes.length ? `<p style="font-size:13px;color:#47585e;margin:0 0 8px;"><strong>Axes d’amélioration résiduels :</strong> ${esc(a.finalAxes.join(' • '))}</p>` : ''}
 
@@ -196,9 +199,15 @@ export function buildStandaloneReportHtml(
     </div>
   </section>` : ''}
 
+  ${config.includeIndividualNarratives ? `
+  <section>
+    <h2>03. Bilans individuels détaillés</h2>
+    ${learnersHtml}
+  </section>` : ''}
+
   ${config.includeActionPlan ? `
   <section>
-    <h2>03. Recommandations managériales & suivi J+30</h2>
+    <h2>04. Recommandations managériales & accompagnement</h2>
     ${analysis.recommendations
       .map(
         (rec) => `
@@ -210,12 +219,6 @@ export function buildStandaloneReportHtml(
       </div>`
       )
       .join('')}
-  </section>` : ''}
-
-  ${config.includeIndividualNarratives ? `
-  <section>
-    <h2>04. Bilans individuels détaillés</h2>
-    ${learnersHtml}
   </section>` : ''}
 
   <footer style="margin-top:42px;padding-top:18px;border-top:1px solid #e1e9eb;text-align:center;font-size:12px;color:#6d7d83;">
