@@ -21,7 +21,7 @@ export const VerdictDistributionChart: React.FC<Props> = ({
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
         <div>
           <h4 className="text-base font-bold text-[#096475]">
-            Distribution des niveaux de certification
+            Distribution des niveaux de maîtrise
           </h4>
           <p className="text-xs text-[#6d7d83]">
             Cliquez sur un niveau pour filtrer les bilans individuels ci-dessous.
