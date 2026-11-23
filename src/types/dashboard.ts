@@ -48,6 +48,7 @@ export interface ReportConfig {
   includeModuleAnalysis: boolean;
   includeActionPlan: boolean;
   includeIndividualNarratives: boolean;
+  includeNextSteps: boolean;
 }
 
 export interface ModuleMetric {

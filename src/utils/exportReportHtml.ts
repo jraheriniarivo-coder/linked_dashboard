@@ -1,3 +1,9 @@
+import {
+  JANUARY_PLANNING_DAYS,
+  JANUARY_PLANNING_META,
+  NEXT_STEPS_HEADLINE,
+  NEXT_STEPS_MILESTONES,
+} from '../data/nextStepsPlan';
 import { CohortAnalysis, ReportConfig } from '../types/dashboard';
 import { getConnecteoLogoDataUri } from './connecteoLogo';
 
@@ -156,6 +162,7 @@ export function buildStandaloneReportHtml(
     .quote { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 19px; color: #096475; padding: 18px 0; margin: 20px 0; border-top: 1px solid #d7e4e7; border-bottom: 1px solid #d7e4e7; }
     .charts-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; align-items: start; }
     .rec-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .plan-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
     .learner-card { border: 1px solid #e1e9eb; border-radius: 14px; padding: 20px; margin-bottom: 18px; break-inside: avoid; page-break-inside: avoid; }
     .no-break { break-inside: avoid; page-break-inside: avoid; }
     @media print {
@@ -236,6 +243,47 @@ export function buildStandaloneReportHtml(
       </div>`
       )
       .join('')}
+    </div>
+  </section>` : ''}
+
+  ${config.includeNextSteps ? `
+  <section class="${config.includeExecutiveNarrative || config.includeCharts || config.includeIndividualNarratives || config.includeActionPlan ? 'section-break ' : ''}no-break">
+    <h2>05. Next Steps — Déploiement terrain & verrouillage des acquis</h2>
+    <p style="font-size:14px;color:#334155;margin:0 0 14px;line-height:1.6;">${esc(NEXT_STEPS_HEADLINE)}</p>
+    <div class="rec-grid" style="margin-bottom:14px;">
+      ${NEXT_STEPS_MILESTONES.map(
+        (step) => `
+        <div style="border:1px solid #d6e6e8;border-radius:12px;padding:14px;background:#f8fbfb;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;font-size:11px;">
+            <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#008c87;">${esc(step.badge)}</span>
+            <span style="font-weight:700;color:#096475;">${esc(step.period)}</span>
+          </div>
+          <div style="font-size:15px;font-weight:900;color:#096475;margin-bottom:4px;">${esc(step.title)}</div>
+          <div style="font-size:12px;color:#47585e;margin-bottom:8px;line-height:1.55;">${esc(step.summary)}</div>
+          <div style="padding-top:8px;border-top:1px solid #e1ecee;font-size:12px;color:#1d2b30;"><strong style="color:#096475;">Livrable clé :</strong> ${esc(step.deliverable)}</div>
+        </div>`
+      ).join('')}
+    </div>
+    <div style="border:1px solid #e1e9eb;border-radius:14px;padding:14px;background:#ffffff;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+        <h3 style="margin:0;font-size:15px;font-weight:900;color:#096475;">${esc(JANUARY_PLANNING_META.title)}</h3>
+        <span style="font-size:12px;font-weight:700;color:#008c87;">${esc(JANUARY_PLANNING_META.subtitle)}</span>
+      </div>
+      <div class="plan-grid">
+        ${JANUARY_PLANNING_DAYS.map(
+          (item) => `
+          <div style="border:1px solid #e5ecee;border-radius:10px;padding:12px;background:#fafcfd;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px;">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:900;color:#00afa9;">${esc(item.day)}</span>
+              <span style="font-size:11px;font-weight:600;color:#6d7d83;">${esc(item.format)}</span>
+            </div>
+            <div style="font-size:13px;font-weight:900;color:#096475;margin-bottom:8px;">${esc(item.title)}</div>
+            <p style="font-size:12px;color:#334155;margin:0 0 6px;line-height:1.5;"><strong style="color:#096475;">Matin :</strong> ${esc(item.morning)}</p>
+            <p style="font-size:12px;color:#334155;margin:0 0 8px;line-height:1.5;"><strong style="color:#096475;">Après-midi :</strong> ${esc(item.afternoon)}</p>
+            <div style="padding-top:8px;border-top:1px solid #e5ecee;font-size:12px;color:#1d2b30;line-height:1.45;"><strong style="color:#008c87;">Cap visé :</strong> ${esc(item.outcome)}</div>
+          </div>`
+        ).join('')}
+      </div>
     </div>
   </section>` : ''}
 

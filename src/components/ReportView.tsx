@@ -14,6 +14,12 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import {
+  JANUARY_PLANNING_DAYS,
+  JANUARY_PLANNING_META,
+  NEXT_STEPS_HEADLINE,
+  NEXT_STEPS_MILESTONES,
+} from '../data/nextStepsPlan';
+import {
   CohortAnalysis,
   ReportConfig,
   VerdictCategory,
@@ -335,6 +341,15 @@ export const ReportView: React.FC<Props> = ({
                   className="accent-[#00afa9]"
                 />
                 Recommandations & accompagnement
+              </label>
+              <label className="inline-flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={config.includeNextSteps}
+                  onChange={(e) => onUpdateConfig({ includeNextSteps: e.target.checked })}
+                  className="accent-[#00afa9]"
+                />
+                Next Steps (Déc. / Janv.)
               </label>
             </div>
           </div>
@@ -893,7 +908,7 @@ export const ReportView: React.FC<Props> = ({
         {/* 05. RECOMMANDATIONS MANAGÉRIALES & ACCOMPAGNEMENT */}
         {config.includeActionPlan && (
           <section
-            className={`print-break-inside-avoid ${
+            className={`mb-12 print:mb-0 print-break-inside-avoid ${
               config.includeExecutiveNarrative ||
               config.includeRoadmap ||
               config.includeCharts ||
@@ -951,8 +966,114 @@ export const ReportView: React.FC<Props> = ({
           </section>
         )}
 
+        {/* 06. NEXT STEPS & FEUILLE DE ROUTE JANVIER */}
+        {config.includeNextSteps && (
+          <section
+            className={`print-break-inside-avoid ${
+              config.includeExecutiveNarrative ||
+              config.includeRoadmap ||
+              config.includeCharts ||
+              config.includeIndividualNarratives ||
+              config.includeActionPlan
+                ? 'print-page-break-before'
+                : ''
+            }`}
+          >
+            <div className="flex items-baseline gap-2.5 mb-4 print:mb-3 pb-2.5 border-b border-[#e8eff1] print-break-after-avoid">
+              <span className="text-xs font-mono font-bold text-[#00afa9]">06.</span>
+              <h2 className="text-xl font-black text-[#096475]">
+                Next Steps — Déploiement terrain & verrouillage des acquis
+              </h2>
+            </div>
+
+            <p className="text-sm text-[#334155] leading-relaxed mb-5 print:mb-3 max-w-3xl print-max-w-none">
+              {NEXT_STEPS_HEADLINE}
+            </p>
+
+            {/* 2 Milestones: December Agency Visit + January Lock-In */}
+            <div className="grid grid-cols-1 md:grid-cols-2 print-grid-2 gap-4 print:gap-3 mb-6 print:mb-4">
+              {NEXT_STEPS_MILESTONES.map((step, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-xl border border-[#d6e6e8] bg-[#f8fbfb] p-5 print:p-3.5 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                      <span className="text-xs font-mono font-bold text-[#008c87]">
+                        {step.badge}
+                      </span>
+                      <span className="text-xs font-bold text-[#096475]">
+                        {step.period}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-black text-[#096475] mb-1.5">
+                      {step.title}
+                    </h3>
+                    <p className="text-xs text-[#47585e] leading-relaxed mb-3 print:mb-2">
+                      {step.summary}
+                    </p>
+                  </div>
+                  <div className="pt-2.5 border-t border-[#e1ecee] text-xs text-[#1d2b30] leading-relaxed">
+                    <strong className="text-[#096475]">Livrable clé :</strong>{' '}
+                    {step.deliverable}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 3-Day Planning Blueprint for 12 Participants */}
+            <div className="rounded-2xl border border-[#e1e9eb] bg-white p-5 print:p-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4 print:mb-3">
+                <h3 className="text-base font-black text-[#096475]">
+                  {JANUARY_PLANNING_META.title}
+                </h3>
+                <span className="text-xs font-bold text-[#008c87]">
+                  {JANUARY_PLANNING_META.subtitle}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 print-grid-3 gap-4 print:gap-3">
+                {JANUARY_PLANNING_DAYS.map((item) => (
+                  <div
+                    key={item.day}
+                    className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-4 print:p-3 flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-xs font-mono font-black text-[#00afa9]">
+                          {item.day}
+                        </span>
+                        <span className="text-[11px] font-semibold text-[#6d7d83]">
+                          {item.format}
+                        </span>
+                      </div>
+                      <h4 className="text-sm font-black text-[#096475] mb-2.5 print:mb-2">
+                        {item.title}
+                      </h4>
+
+                      <div className="space-y-2 text-xs text-[#334155] leading-relaxed">
+                        <p>
+                          <strong className="text-[#096475]">Matin :</strong> {item.morning}
+                        </p>
+                        <p>
+                          <strong className="text-[#096475]">Après-midi :</strong>{' '}
+                          {item.afternoon}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 pt-2.5 border-t border-[#e5ecee] text-xs text-[#1d2b30] leading-relaxed">
+                      <strong className="text-[#008c87]">Cap visé :</strong> {item.outcome}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Footer */}
-        <footer className="mt-12 print:mt-6 pt-6 print:pt-4 border-t border-[#e1e9eb] flex flex-wrap items-center justify-between gap-2 text-xs text-[#6d7d83] print-break-inside-avoid">
+        <footer className="mt-12 print:mt-5 pt-6 print:pt-3 border-t border-[#e1e9eb] flex flex-wrap items-center justify-between gap-2 text-xs text-[#6d7d83] print-break-inside-avoid">
           <span>Connecteo · Chaque expérience est unique</span>
           <span>Rapport généré automatiquement · {today}</span>
         </footer>

@@ -34,6 +34,7 @@ const DEFAULT_REPORT_CONFIG: ReportConfig = {
   includeModuleAnalysis: true,
   includeActionPlan: true,
   includeIndividualNarratives: true,
+  includeNextSteps: true,
 };
 
 function readJsonStorage<T>(key: string, fallback: T): T {
