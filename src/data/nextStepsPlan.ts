@@ -16,7 +16,7 @@ export interface PlanningDayItem {
 }
 
 export const NEXT_STEPS_HEADLINE =
-  'Déploiement post-formation en deux temps : immersion directe sur plateau dès fin décembre pour capter la réalité du terrain, suivie d’une session d'accompagnement en janvier.';
+  'Déploiement post-formation en deux temps : immersion directe sur plateau dès fin décembre pour capter la réalité du terrain, suivie d’une session d’accompagnement en janvier.';
 
 export const NEXT_STEPS_MILESTONES: NextStepMilestone[] = [
   {
