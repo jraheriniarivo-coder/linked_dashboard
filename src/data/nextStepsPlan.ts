@@ -16,26 +16,26 @@ export interface PlanningDayItem {
 }
 
 export const NEXT_STEPS_HEADLINE =
-  'Déploiement post-formation en deux temps : immersion directe sur plateau dès fin décembre pour capter la réalité du terrain, suivie d’une session commando de verrouillage en janvier pour pérenniser les résultats en production.';
+  'Déploiement post-formation en deux temps : immersion directe sur plateau dès fin décembre pour capter la réalité du terrain, suivie d’une session d'accompagnement en janvier.';
 
 export const NEXT_STEPS_MILESTONES: NextStepMilestone[] = [
   {
     badge: 'Étape 01 · Terrain',
     period: 'Semaines du 25 et 31 décembre',
-    title: 'Immersion & audit terrain en agence',
+    title: 'Immersion terrain en agence',
     summary:
-      'Présence opérationnelle au cœur des agences pour observer à chaud l’application des réflexes travaillés (structure en 7 temps, méthode FOS, posture d’appel) sur des dossiers réels de fin d’année et corriger immédiatement les écarts en situation de production.',
+      'Présence au cœur des agences pour observer à chaud l’application des réflexes travaillés (structure en 7 temps, méthode FOS, posture d’appel) sur des dossiers réels de fin d’année et corriger immédiatement les écarts en situation de production.',
     deliverable:
       'Relevé des pratiques réelles sur plateau & sélection de cas concrets pour la session de janvier.',
   },
   {
     badge: 'Étape 02 · Verrouillage',
     period: 'Mois de janvier · 3 jours · 12 participants',
-    title: 'Accompagnement intensif & verrouillage des acquis',
+    title: 'Accompagnement & verrouillage des acquis',
     summary:
       'Session de consolidation ciblée pour neutraliser le retour aux anciens automatismes, élever la maîtrise des objections complexes et verrouiller durablement la prise d’engagement ferme sur chaque appel (incluant la finalisation J5 des profils en attente).',
     deliverable:
-      'Calibrage individuel validé en mise en situation & feuille de route qualité par conseiller.',
+      'Calibrage individuel validé & feuille de route qualité par conseiller.',
   },
 ];
 
@@ -72,7 +72,7 @@ export const JANUARY_PLANNING_DAYS: PlanningDayItem[] = [
     morning:
       'Double écoute ciblée sur cas difficiles et passage des évaluations finales pour les participants devant finaliser leur parcours.',
     afternoon:
-      'Débriefing individuel de calibrage, remise des fiches réflexes opérationnelles par conseiller et partage des indicateurs de suivi avec l’encadrement.',
+      'Débriefing individuel de calibrage et partage des indicateurs de suivi individuel.',
     outcome: 'Verrouiller les acquis des 12 participants.',
   },
 ];
