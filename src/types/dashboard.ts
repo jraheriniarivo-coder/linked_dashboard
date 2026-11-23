@@ -73,7 +73,7 @@ export interface LearnerModuleScore {
   delta: number | null;
 }
 
-export type VerdictCategory = 'expert' | 'maitrise' | 'consolidation' | 'renforcer';
+export type VerdictCategory = 'expert' | 'maitrise' | 'consolidation' | 'renforcer' | 'pending';
 
 export interface LearnerAnalysis {
   learner: Learner;
@@ -111,7 +111,7 @@ export interface VerdictBucket {
 }
 
 export interface CohortRecommendation {
-  priority: 'Priorité haute' | 'Consolidation' | 'Ancrage terrain';
+  priority: 'Planification J5' | 'Priorité haute' | 'Consolidation' | 'Accompagnement';
   title: string;
   rationale: string;
   action: string;
