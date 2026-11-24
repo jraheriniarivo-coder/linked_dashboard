@@ -507,7 +507,8 @@ export function buildStandaloneReportHtml(
       </div>
       <div style="margin-top:14px;font-size:24px;font-weight:900;color:#00c2ba;">Misaotra betsaka !</div>
       <div style="margin-top:18px;font-size:18px;line-height:1.55;color:rgba(255,255,255,0.9);">
-         <div>Aux conseillers, pour leur engagement.</div>
+        <div>À la direction, pour sa confiance.</div>
+        <div>Aux conseillers, pour leur engagement.</div>
       </div>
     </div>
 
