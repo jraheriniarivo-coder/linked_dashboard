@@ -40,8 +40,12 @@ export interface ReportConfig {
   reportTitle: string;
   clientName: string;
   facilitator: string;
+  facilitatorEmail?: string;
+  trainingPeriod?: string;
+  coverSubtitle?: string;
   programTag: string;
   customIntro: string;
+  includeCovers?: boolean;
   includeExecutiveNarrative: boolean;
   includeRoadmap: boolean;
   includeCharts: boolean;
