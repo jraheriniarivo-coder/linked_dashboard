@@ -276,7 +276,7 @@ export const ReportClosingSlide: React.FC<ClosingProps> = ({ logoDataUri, config
         </div>
 
         <div className="mt-5 space-y-1 text-base sm:text-lg text-white/90 leading-relaxed">
-          <p>À la direction, pour sa confiance.</p>
+          <p>À la PAMF, pour sa confiance.</p>
           <p>Aux conseillers, pour leur engagement.</p>
         </div>
       </div>
