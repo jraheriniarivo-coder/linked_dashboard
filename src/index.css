@@ -94,6 +94,21 @@
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .report-slide-page {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 184mm !important;
+    min-height: 184mm !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
   .print-break-inside-avoid {

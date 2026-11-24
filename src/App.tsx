@@ -26,8 +26,13 @@ const DEFAULT_REPORT_CONFIG: ReportConfig = {
   reportTitle: 'Formation Recouvrement — Bilan 5 jours',
   clientName: '',
   facilitator: 'Joatina Dylan RAHERINIARIVO',
+  facilitatorEmail: '',
+  trainingPeriod: 'Parcours 5 jours',
+  coverSubtitle:
+    'Renforcer la posture, l’écoute active et la maîtrise du recouvrement amiable en production.',
   programTag: 'Connecteo 2026 · Parcours Opérationnel',
   customIntro: '',
+  includeCovers: true,
   includeExecutiveNarrative: true,
   includeRoadmap: true,
   includeCharts: true,

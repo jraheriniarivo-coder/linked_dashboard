@@ -25,6 +25,7 @@ import {
   VerdictCategory,
 } from '../types/dashboard';
 import { getConnecteoLogoDataUri } from '../utils/connecteoLogo';
+import { ReportClosingSlide, ReportCoverSlide } from './ReportCovers';
 import { CalibrationQuadrantChart } from './charts/CalibrationQuadrantChart';
 import { ModuleComparisonChart } from './charts/ModuleComparisonChart';
 import { ProgressionSlopeChart } from './charts/ProgressionSlopeChart';
@@ -43,29 +44,39 @@ const ROADMAP_DAYS = [
   {
     day: 'Jour 1',
     title: 'Relation Client',
-    summary: 'Fondations, acteurs, enjeux économiques et articulation satisfaction / fidélisation.',
+    summary: 'Fondamentaux expérience client, posture de service et fidélisation.',
   },
   {
     day: 'Jour 2',
     title: 'Communication',
-    summary: 'Verbal, non-verbal, posture vocale au téléphone, DIVA, écoute active et excellence.',
+    summary: 'Posture vocale, référentiel DIVA, écoute active et reformulation.',
   },
   {
     day: 'Jour 3',
     title: 'Recouvrement',
-    summary: 'Cadre légal et déontologique, profils débiteurs, appel en 7 temps et négociation ferme.',
+    summary: 'Profils débiteurs, structure en 7 temps et négociation ferme.',
   },
   {
     day: 'Jour 4',
     title: 'Situations Complexes',
-    summary: 'Causes du conflit, méthode FOS, désamorçage émotionnel et protocole des 5 R.',
+    summary: 'Méthode FOS, désamorçage émotionnel et protocole des 5 R.',
   },
   {
     day: 'Jour 5',
     title: 'Évaluation finale',
-    summary: 'Consolidation des acquis, simulations évaluées, plan d’action et engagement individuel.',
+    summary: 'Mises en situation évaluées, synthèse et feuille de route.',
   },
 ];
+
+function getInitials(name?: string): string {
+  const parts = String(name || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (!parts.length) return 'CN';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 export const ReportView: React.FC<Props> = ({
   analysis,
@@ -280,6 +291,45 @@ export const ReportView: React.FC<Props> = ({
               />
             </div>
 
+            <div>
+              <label className="block text-xs font-bold text-[#47585e] mb-1">
+                Période / dates (couverture)
+              </label>
+              <input
+                type="text"
+                value={config.trainingPeriod || ''}
+                onChange={(e) => onUpdateConfig({ trainingPeriod: e.target.value })}
+                placeholder="Ex. 5 → 11 décembre 2026"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[#d6e1e3] focus:outline-none focus:border-[#00afa9]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#47585e] mb-1">
+                Email formateur (page Merci)
+              </label>
+              <input
+                type="text"
+                value={config.facilitatorEmail || ''}
+                onChange={(e) => onUpdateConfig({ facilitatorEmail: e.target.value })}
+                placeholder="Ex. prenom.nom@connecteo.mg"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[#d6e1e3] focus:outline-none focus:border-[#00afa9]"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-xs font-bold text-[#47585e] mb-1">
+                Sous-titre couverture
+              </label>
+              <input
+                type="text"
+                value={config.coverSubtitle || ''}
+                onChange={(e) => onUpdateConfig({ coverSubtitle: e.target.value })}
+                placeholder="Ex. Renforcer la posture, l’écoute active et la maîtrise du recouvrement amiable en production."
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[#d6e1e3] focus:outline-none focus:border-[#00afa9]"
+              />
+            </div>
+
             <div className="md:col-span-2 lg:col-span-4">
               <label className="block text-xs font-bold text-[#47585e] mb-1">
                 Note contextuelle du formateur (optionnelle, insérée en ouverture)
@@ -293,6 +343,15 @@ export const ReportView: React.FC<Props> = ({
             </div>
 
             <div className="md:col-span-2 lg:col-span-4 flex flex-wrap items-center gap-5 pt-1 text-xs font-semibold text-[#47585e]">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={config.includeCovers !== false}
+                  onChange={(e) => onUpdateConfig({ includeCovers: e.target.checked })}
+                  className="accent-[#00afa9]"
+                />
+                Couverture & page « Merci »
+              </label>
               <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -357,284 +416,344 @@ export const ReportView: React.FC<Props> = ({
       </section>
 
       {/* ================================================================
+          PAGE 1 : CONNECTEO COVER SLIDE
+         ================================================================ */}
+      {config.includeCovers !== false && (
+        <ReportCoverSlide
+          logoDataUri={logoDataUri}
+          config={config}
+          analysis={analysis}
+          groupLabel={groupLabel}
+        />
+      )}
+
+      {/* ================================================================
           REPORT EDITORIAL DOCUMENT CANVAS
          ================================================================ */}
-      <div className="bg-white border border-[#e1e9eb] rounded-2xl px-6 py-8 sm:px-12 sm:py-12 max-w-[1040px] mx-auto print-only-full">
-        {/* Document Header */}
-        <header className="pb-8 border-b border-[#d9e5e7] mb-10 print-compact-header print-break-inside-avoid">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6 print:mb-3">
-            <img
-              src={logoDataUri}
-              alt="Connecteo"
-              className="h-10 sm:h-11 w-auto block"
-            />
-            <span className="text-xs font-bold tracking-wide text-[#008c87]">
-              {config.programTag}
-            </span>
-          </div>
+      <div
+        className={`bg-white border border-[#e1e9eb] rounded-2xl overflow-hidden print:overflow-visible max-w-[1040px] mx-auto print-only-full ${
+          config.includeCovers !== false ? 'print-page-break-before' : ''
+        }`}
+      >
+        {/* Top Connecteo Signature Band */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#064552] via-[#096475] to-[#00afa9]" />
 
-          <h1 className="text-3xl sm:text-4xl font-black text-[#096475] tracking-tight leading-tight max-w-3xl print-max-w-none [text-wrap:balance]">
-            {config.reportTitle}
-          </h1>
-
-          {/* Unboxed typographic metadata */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[#6d7d83] mt-3">
-            {config.clientName && (
-              <>
-                <span>
-                  Client : <strong className="text-[#1d2b30]">{config.clientName}</strong>
-                </span>
-                <span aria-hidden="true">·</span>
-              </>
-            )}
-            <span>
-              Périmètre : <strong className="text-[#096475]">{groupLabel}</strong>
-            </span>
-            <span aria-hidden="true">·</span>
-            <span>Facilitateur : {config.facilitator}</span>
-            <span aria-hidden="true">·</span>
-            <span>Édité le {today}</span>
-            <span aria-hidden="true">·</span>
-            <span className="font-mono tabular-nums">{analysis.total} apprenants</span>
-          </div>
-        </header>
-
-        {/* 01. SYNTHÈSE EXÉCUTIVE & NARRATION */}
-        {config.includeExecutiveNarrative && (
-          <section className="mb-12 print-compact-section print-break-inside-avoid">
-            <div className="flex items-baseline gap-2.5 mb-4 pb-2.5 border-b border-[#e8eff1] print-break-after-avoid">
-              <span className="text-xs font-mono font-bold text-[#00afa9]">01.</span>
-              <h2 className="text-xl font-black text-[#096475]">
-                Synthèse exécutive & narration des résultats
-              </h2>
+        <div className="px-6 py-8 sm:px-12 sm:py-10 print:px-0 print:py-3">
+          {/* Document Header */}
+          <header className="rounded-xl bg-gradient-to-br from-[#f4fafa] via-white to-[#eef8f8] border border-[#d6e7e9] px-6 py-5 print:px-5 print:py-4 mb-9 print:mb-5 print-break-inside-avoid">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4 print:mb-2.5">
+              <img
+                src={logoDataUri}
+                alt="Connecteo"
+                className="h-10 sm:h-11 w-auto block"
+              />
+              <span className="text-xs font-bold tracking-wide text-[#008c87]">
+                {config.programTag}
+              </span>
             </div>
 
-            <p className="text-lg sm:text-xl font-bold text-[#1d2b30] leading-snug mb-6 print:mb-4 max-w-3xl print-max-w-none [text-wrap:balance]">
-              {analysis.executiveHeadline}
-            </p>
+            <h1 className="text-3xl sm:text-4xl font-black text-[#096475] tracking-tight leading-tight max-w-3xl print-max-w-none [text-wrap:balance]">
+              {config.reportTitle}
+            </h1>
 
-            {/* Clean KPI Strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 print-grid-6 gap-3 mb-7 print:mb-4">
-              <div className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-4">
-                <div className="text-xs text-[#6d7d83] font-semibold">Effectif évalué</div>
-                <div className="text-2xl font-black text-[#096475] font-mono tabular-nums mt-1">
-                  {analysis.total}
-                </div>
-                <div className="text-[11px] text-[#6d7d83] mt-0.5">
-                  {analysis.priorTrainingRate}% déjà formés RC
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-4">
-                <div className="text-xs text-[#6d7d83] font-semibold">Diagnostic initial</div>
-                <div className="text-2xl font-black text-[#1d2b30] font-mono tabular-nums mt-1">
-                  {analysis.preAvg}%
-                </div>
-                <div className="text-[11px] text-[#6d7d83] mt-0.5">
-                  Auto-éval : {analysis.selfEvalAvg ? `${analysis.selfEvalAvg}%` : '—'}
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-4">
-                <div className="text-xs text-[#6d7d83] font-semibold">Évaluation finale</div>
-                <div className="text-2xl font-black text-[#096475] font-mono tabular-nums mt-1">
-                  {analysis.postAvg}%
-                </div>
-                <div className="text-[11px] text-[#6d7d83] mt-0.5">
-                  Médiane : {analysis.medianPost}%
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-4">
-                <div className="text-xs text-[#6d7d83] font-semibold">Progression nette</div>
-                <div
-                  className={`text-2xl font-black font-mono tabular-nums mt-1 ${
-                    analysis.progression >= 0 ? 'text-[#008c87]' : 'text-[#c62828]'
-                  }`}
-                >
-                  {analysis.progression >= 0 ? '+' : ''}
-                  {analysis.progression} pts
-                </div>
-                <div className="text-[11px] text-[#6d7d83] mt-0.5">
-                  Écart min–max : {analysis.spreadPost} pts
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-4">
-                <div className="text-xs text-[#6d7d83] font-semibold">Validation ≥ 60%</div>
-                <div className="text-2xl font-black text-[#096475] font-mono tabular-nums mt-1">
-                  {analysis.validationRate}%
-                </div>
-                <div className="text-[11px] text-[#6d7d83] mt-0.5">
-                  {analysis.passedCount}/{analysis.withFinalCount} validés
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-4">
-                <div className="text-xs text-[#6d7d83] font-semibold">Simulation appel</div>
-                <div className="text-2xl font-black text-[#b45309] font-mono tabular-nums mt-1">
-                  {analysis.withSimCount ? `${analysis.simAvg}%` : '—'}
-                </div>
-                <div className="text-[11px] text-[#6d7d83] mt-0.5">
-                  {analysis.withSimCount
-                    ? `${analysis.withSimCount} mises en situation`
-                    : 'Non évaluée'}
-                </div>
-              </div>
-            </div>
-
-            {/* Automated Editorial Narrative */}
-            <div className="space-y-3.5 print:space-y-2 max-w-3xl print-max-w-none text-[15px] text-[#334155] leading-relaxed">
-              {config.customIntro.trim() && (
-                <p className="text-[#1d2b30] font-medium">{config.customIntro.trim()}</p>
-              )}
-              {analysis.executiveNarrative.map((para, i) => (
-                <p key={i}>{para}</p>
-              ))}
-            </div>
-
-            {/* Editorial Serif Pull Quote (no thick left border — subtle top & bottom hairlines) */}
-            <blockquote className="my-7 py-5 print-compact-quote border-y border-[#dbe7e9] font-serif italic text-lg sm:text-xl text-[#096475] leading-relaxed max-w-3xl print-max-w-none">
-              {analysis.pullQuote}
-            </blockquote>
-          </section>
-        )}
-
-        {/* 02. ARCHITECTURE DU PARCOURS */}
-        {config.includeRoadmap && (
-          <section className="mb-12 print:mb-0 print-break-inside-avoid">
-            <div className="flex items-baseline gap-2.5 mb-4 pb-2.5 border-b border-[#e8eff1] print-break-after-avoid">
-              <span className="text-xs font-mono font-bold text-[#00afa9]">02.</span>
-              <h2 className="text-xl font-black text-[#096475]">
-                Architecture pédagogique — Parcours 5 jours
-              </h2>
-            </div>
-
-            <p className="text-sm text-[#47585e] mb-5 print:mb-3 max-w-3xl print-max-w-none">
-              Le dispositif s’est articulé autour d’une progression opérationnelle en cinq étapes, guidée par le fil rouge « Chaque expérience est unique ».
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 print-grid-5 gap-3">
-              {ROADMAP_DAYS.map((step) => (
-                <div
-                  key={step.day}
-                  className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-4 flex flex-col"
-                >
-                  <span className="text-xs font-mono font-bold text-[#008c87]">
-                    {step.day}
+            {/* Unboxed typographic metadata */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[#6d7d83] mt-3 pt-3 border-t border-[#e1eff1]">
+              {config.clientName && (
+                <>
+                  <span>
+                    Client : <strong className="text-[#1d2b30]">{config.clientName}</strong>
                   </span>
-                  <h3 className="text-sm font-black text-[#096475] mt-1 mb-1.5">
-                    {step.title}
-                  </h3>
-                  <p className="text-xs text-[#52636a] leading-relaxed">{step.summary}</p>
-                </div>
-              ))}
+                  <span aria-hidden="true">·</span>
+                </>
+              )}
+              <span>
+                Périmètre : <strong className="text-[#096475]">{groupLabel}</strong>
+              </span>
+              <span aria-hidden="true">·</span>
+              <span>Facilitateur : {config.facilitator}</span>
+              <span aria-hidden="true">·</span>
+              <span>Édité le {today}</span>
+              <span aria-hidden="true">·</span>
+              <span className="font-mono tabular-nums">{analysis.total} apprenants</span>
             </div>
-          </section>
-        )}
+          </header>
 
-        {/* 03. GRAPHIQUES INTERACTIFS & ANALYSE PAR COMPÉTENCE */}
-        {config.includeCharts && (
-          <section
-            className={`mb-12 print:mb-0 ${
-              config.includeExecutiveNarrative || config.includeRoadmap
-                ? 'print-page-break-before'
-                : ''
-            }`}
-          >
-            <div className="print-break-inside-avoid">
-              <div className="flex items-baseline gap-2.5 mb-5 print:mb-3 pb-2.5 border-b border-[#e8eff1] print-break-after-avoid">
-                <span className="text-xs font-mono font-bold text-[#00afa9]">03.</span>
-                <h2 className="text-xl font-black text-[#096475]">
-                  Visualisations interactives & analyse par compétence
-                </h2>
+          {/* 01. SYNTHÈSE EXÉCUTIVE & NARRATION */}
+          {config.includeExecutiveNarrative && (
+            <section className="mb-11 print-compact-section print-break-inside-avoid">
+              <div className="flex items-center justify-between gap-4 mb-4 pb-2.5 border-b border-[#dbe7e9] print-break-after-avoid">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#096475] text-white text-xs font-mono font-bold shrink-0">
+                    01
+                  </span>
+                  <h2 className="text-xl font-black text-[#096475]">
+                    Synthèse exécutive & narration des résultats
+                  </h2>
+                </div>
+                <span className="hidden sm:inline-block text-xs font-semibold text-[#008c87] shrink-0">
+                  Vue d’ensemble
+                </span>
               </div>
 
-              {/* Chart 1 & 2 */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 print-grid-12 gap-6 print:gap-4 mb-6 print:mb-4">
-                <div className="lg:col-span-7 print-col-span-7 rounded-2xl border border-[#e5ecee] bg-white p-5 print-compact-card">
-                  <ProgressionSlopeChart
-                    analyses={analysis.learnerAnalyses}
-                    selectedEmail={selectedEmail}
-                    onSelectLearner={handleSelectLearner}
-                  />
-                </div>
+              <p className="text-lg sm:text-xl font-bold text-[#1d2b30] leading-snug mb-5 print:mb-3.5 max-w-3xl print-max-w-none [text-wrap:balance]">
+                {analysis.executiveHeadline}
+              </p>
 
-                <div className="lg:col-span-5 print-col-span-5 rounded-2xl border border-[#e5ecee] bg-white p-5 print-compact-card">
-                  <ModuleComparisonChart modules={analysis.modules} />
-                </div>
-              </div>
-
-              {/* Automated Module & Transfer Prose */}
-              <div className="rounded-2xl border border-[#e5ecee] bg-[#f8fbfb] p-5 sm:p-6 print-compact-card mb-6 print:mb-0 space-y-3 text-sm text-[#334155] leading-relaxed">
-                <div>
-                  <h4 className="text-sm font-black text-[#096475] mb-1">
-                    Analyse automatisée des piliers J1–J4
-                  </h4>
-                  <p>{analysis.moduleNarrative}</p>
-                </div>
-                {analysis.transferNarrative && (
-                  <div className="pt-3 border-t border-[#e5ecee]">
-                    <h4 className="text-sm font-black text-[#096475] mb-1">
-                      Transfert pratique & posture terrain
-                    </h4>
-                    <p>{analysis.transferNarrative}</p>
+              {/* Clean KPI Strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 print-grid-6 gap-3 mb-6 print:mb-3.5">
+                <div className="rounded-xl border border-[#e1ecee] border-t-2 border-t-[#096475] bg-[#fafcfd] p-4 print:p-3">
+                  <div className="text-xs text-[#6d7d83] font-semibold">Effectif évalué</div>
+                  <div className="text-2xl font-black text-[#096475] font-mono tabular-nums mt-1">
+                    {analysis.total}
                   </div>
+                  <div className="text-[11px] text-[#6d7d83] mt-0.5">
+                    {analysis.priorTrainingRate}% déjà formés RC
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-[#e1ecee] border-t-2 border-t-[#64748b] bg-[#fafcfd] p-4 print:p-3">
+                  <div className="text-xs text-[#6d7d83] font-semibold">Diagnostic initial</div>
+                  <div className="text-2xl font-black text-[#1d2b30] font-mono tabular-nums mt-1">
+                    {analysis.preAvg}%
+                  </div>
+                  <div className="text-[11px] text-[#6d7d83] mt-0.5">
+                    Auto-éval : {analysis.selfEvalAvg ? `${analysis.selfEvalAvg}%` : '—'}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-[#e1ecee] border-t-2 border-t-[#096475] bg-[#f5fbfb] p-4 print:p-3">
+                  <div className="text-xs text-[#096475] font-semibold">Évaluation finale</div>
+                  <div className="text-2xl font-black text-[#096475] font-mono tabular-nums mt-1">
+                    {analysis.postAvg}%
+                  </div>
+                  <div className="text-[11px] text-[#6d7d83] mt-0.5">
+                    Médiane : {analysis.medianPost}%
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-[#e1ecee] border-t-2 border-t-[#00afa9] bg-[#f5fbfb] p-4 print:p-3">
+                  <div className="text-xs text-[#008c87] font-semibold">Progression nette</div>
+                  <div
+                    className={`text-2xl font-black font-mono tabular-nums mt-1 ${
+                      analysis.progression >= 0 ? 'text-[#008c87]' : 'text-[#c62828]'
+                    }`}
+                  >
+                    {analysis.progression >= 0 ? '+' : ''}
+                    {analysis.progression} pts
+                  </div>
+                  <div className="text-[11px] text-[#6d7d83] mt-0.5">
+                    Écart min–max : {analysis.spreadPost} pts
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-[#e1ecee] border-t-2 border-t-[#00afa9] bg-[#fafcfd] p-4 print:p-3">
+                  <div className="text-xs text-[#6d7d83] font-semibold">Validation ≥ 60%</div>
+                  <div className="text-2xl font-black text-[#096475] font-mono tabular-nums mt-1">
+                    {analysis.validationRate}%
+                  </div>
+                  <div className="text-[11px] text-[#6d7d83] mt-0.5">
+                    {analysis.passedCount}/{analysis.withFinalCount} validés
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-[#e1ecee] border-t-2 border-t-[#ffa900] bg-[#fffdf8] p-4 print:p-3">
+                  <div className="text-xs text-[#9a5400] font-semibold">Simulation appel</div>
+                  <div className="text-2xl font-black text-[#b45309] font-mono tabular-nums mt-1">
+                    {analysis.withSimCount ? `${analysis.simAvg}%` : '—'}
+                  </div>
+                  <div className="text-[11px] text-[#6d7d83] mt-0.5">
+                    {analysis.withSimCount
+                      ? `${analysis.withSimCount} mises en situation`
+                      : 'Non évaluée'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Automated Editorial Narrative */}
+              <div className="space-y-2.5 print:space-y-1.5 max-w-3xl print-max-w-none text-[15px] text-[#334155] leading-relaxed">
+                {config.customIntro.trim() && (
+                  <p className="text-[#1d2b30] font-medium">{config.customIntro.trim()}</p>
                 )}
-              </div>
-            </div>
-
-            {/* Chart 3 & 4 (dedicated landscape sheet) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 print-grid-12 gap-6 print:gap-4 print-page-break-before print-break-inside-avoid">
-              <div className="lg:col-span-6 print-col-span-6 rounded-2xl border border-[#e5ecee] bg-white p-5 print-compact-card">
-                <CalibrationQuadrantChart
-                  analyses={analysis.learnerAnalyses}
-                  onSelectLearner={handleSelectLearner}
-                />
+                {analysis.executiveNarrative.map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))}
               </div>
 
-              <div className="lg:col-span-6 print-col-span-6 rounded-2xl border border-[#e5ecee] bg-white p-5 print-compact-card flex flex-col justify-between gap-5">
-                <VerdictDistributionChart
-                  buckets={analysis.verdictDistribution}
-                  total={analysis.total}
-                  activeFilter={verdictFilter}
-                  onFilterChange={setVerdictFilter}
-                />
+              {/* Editorial Serif Pull Quote */}
+              <blockquote className="my-6 print-compact-quote rounded-xl bg-[#f4fafa] border border-[#d6e9eb] px-6 py-4 font-serif italic text-lg sm:text-xl text-[#096475] leading-relaxed max-w-3xl print-max-w-none">
+                {analysis.pullQuote}
+              </blockquote>
+            </section>
+          )}
 
-                {/* Top Remaining Axes Summary */}
-                <div className="pt-4 border-t border-[#edf2f3]">
-                  <h5 className="text-xs font-bold text-[#096475] mb-2">
-                    Thématiques prioritaires de consolidation post-formation
-                  </h5>
-                  {analysis.topRemainingAxes.length > 0 ? (
-                    <ul className="space-y-1.5 text-xs text-[#47585e]">
-                      {analysis.topRemainingAxes.map((ax) => (
-                        <li
-                          key={ax.label}
-                          className="flex items-center justify-between gap-3"
-                        >
-                          <span>{ax.label}</span>
-                          <span className="font-mono font-bold text-[#096475] shrink-0">
-                            {ax.count} apprenant{ax.count > 1 ? 's' : ''}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-xs text-[#6d7d83]">
-                      Aucun axe critique résiduel signalé sur cette sélection.
-                    </p>
+          {/* 02. ARCHITECTURE DU PARCOURS */}
+          {config.includeRoadmap && (
+            <section className="mb-11 print:mb-0 print-break-inside-avoid">
+              <div className="flex items-center justify-between gap-4 mb-4 pb-2.5 border-b border-[#dbe7e9] print-break-after-avoid">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#096475] text-white text-xs font-mono font-bold shrink-0">
+                    02
+                  </span>
+                  <h2 className="text-xl font-black text-[#096475]">
+                    Architecture pédagogique — Parcours 5 jours
+                  </h2>
+                </div>
+                <span className="hidden sm:inline-block text-xs font-semibold text-[#008c87] shrink-0">
+                  Chaque expérience est unique
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 print-grid-5 gap-3">
+                {ROADMAP_DAYS.map((step, i) => (
+                  <div
+                    key={step.day}
+                    className="rounded-xl border border-[#dce9eb] border-t-2 border-t-[#00afa9] bg-[#fafcfd] overflow-hidden flex flex-col"
+                  >
+                    <div className="bg-[#eef7f8] px-3.5 py-2 flex items-center justify-between border-b border-[#e1eff1]">
+                      <span className="text-xs font-mono font-bold text-[#096475]">
+                        {step.day}
+                      </span>
+                      <span className="text-[11px] font-mono font-bold text-[#008c87]">
+                        0{i + 1}/05
+                      </span>
+                    </div>
+                    <div className="p-3.5">
+                      <h3 className="text-sm font-black text-[#096475] mb-1">
+                        {step.title}
+                      </h3>
+                      <p className="text-xs text-[#52636a] leading-relaxed">{step.summary}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* 03. GRAPHIQUES INTERACTIFS & ANALYSE PAR COMPÉTENCE */}
+          {config.includeCharts && (
+            <section
+              className={`mb-11 print:mb-0 ${
+                config.includeExecutiveNarrative || config.includeRoadmap
+                  ? 'print-page-break-before'
+                  : ''
+              }`}
+            >
+              <div className="print-break-inside-avoid">
+                <div className="flex items-center justify-between gap-4 mb-5 print:mb-3 pb-2.5 border-b border-[#dbe7e9] print-break-after-avoid">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#096475] text-white text-xs font-mono font-bold shrink-0">
+                      03
+                    </span>
+                    <h2 className="text-xl font-black text-[#096475]">
+                      Visualisations interactives & analyse par compétence
+                    </h2>
+                  </div>
+                  <span className="hidden sm:inline-block text-xs font-semibold text-[#008c87] shrink-0">
+                    Trajectoires & piliers
+                  </span>
+                </div>
+
+                {/* Chart 1 & 2 */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 print-grid-12 gap-5 print:gap-4 mb-5 print:mb-3.5">
+                  <div className="lg:col-span-7 print-col-span-7 rounded-2xl border border-[#dce9eb] border-t-2 border-t-[#096475] bg-white p-5 print-compact-card">
+                    <ProgressionSlopeChart
+                      analyses={analysis.learnerAnalyses}
+                      selectedEmail={selectedEmail}
+                      onSelectLearner={handleSelectLearner}
+                    />
+                  </div>
+
+                  <div className="lg:col-span-5 print-col-span-5 rounded-2xl border border-[#dce9eb] border-t-2 border-t-[#00afa9] bg-white p-5 print-compact-card">
+                    <ModuleComparisonChart modules={analysis.modules} />
+                  </div>
+                </div>
+
+                {/* Automated Module & Transfer Prose */}
+                <div className="rounded-2xl border border-[#d6e7e9] bg-[#f4fafa] p-5 print:p-4 mb-6 print:mb-0 grid grid-cols-1 md:grid-cols-2 print-grid-2 gap-5 text-sm text-[#334155] leading-relaxed">
+                  <div>
+                    <h4 className="text-sm font-black text-[#096475] mb-1">
+                      Analyse des piliers J1–J4
+                    </h4>
+                    <p>{analysis.moduleNarrative}</p>
+                  </div>
+                  {analysis.transferNarrative && (
+                    <div className="md:border-l md:border-[#d6e7e9] md:pl-5 print:border-l print:border-[#d6e7e9] print:pl-5">
+                      <h4 className="text-sm font-black text-[#096475] mb-1">
+                        Transfert pratique & posture terrain
+                      </h4>
+                      <p>{analysis.transferNarrative}</p>
+                    </div>
                   )}
                 </div>
               </div>
-            </div>
-          </section>
-        )}
+
+              {/* Chart 3 & 4 (dedicated landscape sheet) */}
+              <div className="pt-2 print:pt-0 print-page-break-before print-break-inside-avoid">
+                <div className="hidden print:flex items-center justify-between gap-4 mb-3 pb-2.5 border-b border-[#dbe7e9]">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#096475] text-white text-xs font-mono font-bold shrink-0">
+                      03
+                    </span>
+                    <h2 className="text-xl font-black text-[#096475]">
+                      Positionnement individuel & niveaux de maîtrise
+                    </h2>
+                  </div>
+                  <span className="text-xs font-semibold text-[#008c87] shrink-0">
+                    Calibration & axes
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 print-grid-12 gap-5 print:gap-4">
+                  <div className="lg:col-span-6 print-col-span-6 rounded-2xl border border-[#dce9eb] border-t-2 border-t-[#096475] bg-white p-5 print-compact-card">
+                    <CalibrationQuadrantChart
+                      analyses={analysis.learnerAnalyses}
+                      onSelectLearner={handleSelectLearner}
+                    />
+                  </div>
+
+                  <div className="lg:col-span-6 print-col-span-6 rounded-2xl border border-[#dce9eb] border-t-2 border-t-[#00afa9] bg-white p-5 print-compact-card flex flex-col justify-between gap-5">
+                    <VerdictDistributionChart
+                      buckets={analysis.verdictDistribution}
+                      total={analysis.total}
+                      activeFilter={verdictFilter}
+                      onFilterChange={setVerdictFilter}
+                    />
+
+                    {/* Top Remaining Axes Summary */}
+                    <div className="pt-4 border-t border-[#edf2f3]">
+                      <h5 className="text-xs font-bold text-[#096475] mb-2">
+                        Thématiques prioritaires de consolidation
+                      </h5>
+                      {analysis.topRemainingAxes.length > 0 ? (
+                        <ul className="space-y-1.5 text-xs text-[#47585e]">
+                          {analysis.topRemainingAxes.map((ax) => (
+                            <li
+                              key={ax.label}
+                              className="flex items-center justify-between gap-3"
+                            >
+                              <span>{ax.label}</span>
+                              <span className="font-mono font-bold text-[#096475] shrink-0">
+                                {ax.count} apprenant{ax.count > 1 ? 's' : ''}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-xs text-[#6d7d83]">
+                          Aucun axe critique résiduel signalé sur cette sélection.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
 
         {/* 04. BILANS INDIVIDUELS NARRATIFS (1 feuille dédiée par apprenant en PDF) */}
         {config.includeIndividualNarratives && (
           <section
-            className={`mb-12 print:mb-0 ${
+            className={`mb-11 print:mb-0 ${
               config.includeExecutiveNarrative ||
               config.includeRoadmap ||
               config.includeCharts
@@ -642,11 +761,13 @@ export const ReportView: React.FC<Props> = ({
                 : ''
             }`}
           >
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-5 print:mb-3 pb-2.5 border-b border-[#e8eff1] print-break-after-avoid">
-              <div className="flex items-baseline gap-2.5">
-                <span className="text-xs font-mono font-bold text-[#00afa9]">04.</span>
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-5 print:mb-3 pb-2.5 border-b border-[#dbe7e9] print-break-after-avoid">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#096475] text-white text-xs font-mono font-bold shrink-0">
+                  04
+                </span>
                 <h2 className="text-xl font-black text-[#096475]">
-                  Bilans individuels narratifs ({filteredLearners.length})
+                  Bilans individuels ({filteredLearners.length})
                 </h2>
               </div>
 
@@ -689,24 +810,28 @@ export const ReportView: React.FC<Props> = ({
                     ref={(el) => {
                       learnerRefs.current[item.emailKey] = el;
                     }}
-                    className={`rounded-2xl border p-6 print-compact-card transition-colors print-break-inside-avoid ${
+                    className={`rounded-2xl border overflow-hidden print:overflow-visible p-6 print-compact-card transition-colors print-break-inside-avoid ${
                       idx > 0 ? 'print-page-break-before' : ''
                     } ${
                       isSelected
                         ? 'border-[#00afa9] bg-[#fcffff]'
-                        : 'border-[#e1e9eb] bg-white'
+                        : 'border-[#d8e7e9] bg-white'
                     }`}
                   >
-                    {/* Header Row */}
-                    <div className="flex flex-wrap items-start justify-between gap-4 pb-4 print:pb-3 mb-5 print:mb-3 border-b border-[#edf2f3]">
-                      <div>
-                        <h3 className="text-lg font-black text-[#096475]">
-                          {item.learner.name || '—'}
-                        </h3>
-                        <div className="text-xs text-[#6d7d83] mt-0.5">
-                          {item.learner.email || '—'} · {item.learner.wave || 'Sans vague'} ·{' '}
-                          {item.learner.seniority || 'Ancienneté N/C'} · Langues :{' '}
-                          {item.learner.langues || '—'}
+                    {/* Header Row with Monogram & Subtle Gradient */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 -mx-6 -mt-6 px-6 py-4 print:-mx-4 print:-mt-4 print:px-4 print:py-3 mb-5 print:mb-3 bg-gradient-to-r from-[#f3fafa] via-[#fafdfd] to-white border-b border-[#dbe9eb]">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#096475] to-[#00afa9] text-white font-black text-sm flex items-center justify-center shrink-0">
+                          {getInitials(item.learner.name)}
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-black text-[#096475]">
+                            {item.learner.name || '—'}
+                          </h3>
+                          <div className="text-xs text-[#6d7d83]">
+                            {item.learner.email || '—'} · {item.learner.wave || 'Sans vague'} ·{' '}
+                            {item.learner.seniority || 'Ancienneté N/C'} · {item.learner.langues || '—'}
+                          </div>
                         </div>
                       </div>
 
@@ -727,8 +852,8 @@ export const ReportView: React.FC<Props> = ({
                     </div>
 
                     {/* Numeric Summary Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 print-grid-4 gap-3 mb-5 print:mb-3">
-                      <div className="rounded-xl bg-[#f6f9fa] p-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 print-grid-4 gap-3 mb-4 print:mb-3">
+                      <div className="rounded-xl bg-[#f6f9fa] border border-[#e6eef0] border-t-2 border-t-[#94a3b8] p-3">
                         <div className="text-[11px] text-[#6d7d83] font-semibold">Pré-quiz</div>
                         <div className="text-xl font-black text-[#1d2b30] font-mono tabular-nums">
                           {item.hasPre ? `${item.prePct}%` : '—'}
@@ -738,20 +863,20 @@ export const ReportView: React.FC<Props> = ({
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-[#f6f9fa] p-3">
-                        <div className="text-[11px] text-[#6d7d83] font-semibold">Quiz final</div>
+                      <div className="rounded-xl bg-[#f4fafa] border border-[#dcebed] border-t-2 border-t-[#096475] p-3">
+                        <div className="text-[11px] text-[#096475] font-semibold">Quiz final</div>
                         <div className="text-xl font-black text-[#096475] font-mono tabular-nums">
                           {item.hasPost ? `${item.postPct}%` : '—'}
                         </div>
                         <div className="text-[11px] text-[#6d7d83]">
                           {item.verdictCategory === 'pending'
-                            ? 'Reprise prévue J5 (Gr. 2)'
+                            ? 'Reprise J5 (Gr. 2)'
                             : 'Seuil requis : 60%'}
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-[#f6f9fa] p-3">
-                        <div className="text-[11px] text-[#6d7d83] font-semibold">Progression</div>
+                      <div className="rounded-xl bg-[#f4fafa] border border-[#dcebed] border-t-2 border-t-[#00afa9] p-3">
+                        <div className="text-[11px] text-[#008c87] font-semibold">Progression</div>
                         <div
                           className={`text-xl font-black font-mono tabular-nums ${
                             item.progression >= 0 ? 'text-[#008c87]' : 'text-[#c62828]'
@@ -766,8 +891,8 @@ export const ReportView: React.FC<Props> = ({
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-[#f6f9fa] p-3">
-                        <div className="text-[11px] text-[#6d7d83] font-semibold">
+                      <div className="rounded-xl bg-[#fffcf5] border border-[#f3e6c8] border-t-2 border-t-[#ffa900] p-3">
+                        <div className="text-[11px] text-[#9a5400] font-semibold">
                           Simulation d’appel
                         </div>
                         <div className="text-xl font-black text-[#b45309] font-mono tabular-nums">
@@ -776,7 +901,7 @@ export const ReportView: React.FC<Props> = ({
                         <div className="text-[11px] text-[#6d7d83] truncate">
                           {item.learner.sim_verdict ||
                             (item.verdictCategory === 'pending'
-                              ? 'À passer avec le Groupe 2'
+                              ? 'À passer avec Groupe 2'
                               : 'Non renseignée')}
                         </div>
                       </div>
@@ -908,7 +1033,7 @@ export const ReportView: React.FC<Props> = ({
         {/* 05. RECOMMANDATIONS MANAGÉRIALES & ACCOMPAGNEMENT */}
         {config.includeActionPlan && (
           <section
-            className={`mb-12 print:mb-0 print-break-inside-avoid ${
+            className={`mb-11 print:mb-0 print-break-inside-avoid ${
               config.includeExecutiveNarrative ||
               config.includeRoadmap ||
               config.includeCharts ||
@@ -917,11 +1042,18 @@ export const ReportView: React.FC<Props> = ({
                 : ''
             }`}
           >
-            <div className="flex items-baseline gap-2.5 mb-5 print:mb-4 pb-2.5 border-b border-[#e8eff1] print-break-after-avoid">
-              <span className="text-xs font-mono font-bold text-[#00afa9]">05.</span>
-              <h2 className="text-xl font-black text-[#096475]">
-                Recommandations managériales & accompagnement
-              </h2>
+            <div className="flex items-center justify-between gap-4 mb-5 print:mb-4 pb-2.5 border-b border-[#dbe7e9] print-break-after-avoid">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#096475] text-white text-xs font-mono font-bold shrink-0">
+                  05
+                </span>
+                <h2 className="text-xl font-black text-[#096475]">
+                  Recommandations managériales & accompagnement
+                </h2>
+              </div>
+              <span className="hidden sm:inline-block text-xs font-semibold text-[#008c87] shrink-0">
+                Consolidation terrain
+              </span>
             </div>
 
             <div
@@ -931,37 +1063,53 @@ export const ReportView: React.FC<Props> = ({
                   : 'md:grid-cols-3'
               }`}
             >
-              {analysis.recommendations.map((rec, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-5 print-compact-card flex flex-col justify-between print-break-inside-avoid"
-                >
-                  <div>
-                    <div
-                      className={`text-xs font-bold mb-1.5 ${
-                        rec.priority === 'Priorité haute'
-                          ? 'text-[#c62828]'
-                          : rec.priority === 'Planification J5'
-                          ? 'text-[#096475]'
-                          : rec.priority === 'Consolidation'
-                          ? 'text-[#b45309]'
-                          : 'text-[#008c87]'
-                      }`}
-                    >
-                      {rec.priority}
+              {analysis.recommendations.map((rec, idx) => {
+                const topAccent =
+                  rec.priority === 'Priorité haute'
+                    ? 'border-t-[#c62828]'
+                    : rec.priority === 'Planification J5'
+                    ? 'border-t-[#096475]'
+                    : rec.priority === 'Consolidation'
+                    ? 'border-t-[#ffa900]'
+                    : 'border-t-[#00afa9]';
+
+                return (
+                  <div
+                    key={idx}
+                    className={`rounded-xl border border-[#dce9eb] border-t-2 ${topAccent} bg-[#fafcfd] p-5 print-compact-card flex flex-col justify-between print-break-inside-avoid`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span
+                          className={`text-xs font-bold ${
+                            rec.priority === 'Priorité haute'
+                              ? 'text-[#c62828]'
+                              : rec.priority === 'Planification J5'
+                              ? 'text-[#096475]'
+                              : rec.priority === 'Consolidation'
+                              ? 'text-[#b45309]'
+                              : 'text-[#008c87]'
+                          }`}
+                        >
+                          {rec.priority}
+                        </span>
+                        <span className="text-[11px] font-mono font-bold text-[#6d7d83]">
+                          0{idx + 1}
+                        </span>
+                      </div>
+                      <h3 className="text-base font-black text-[#096475] mb-1.5">
+                        {rec.title}
+                      </h3>
+                      <p className="text-xs text-[#52636a] leading-relaxed mb-3">
+                        {rec.rationale}
+                      </p>
                     </div>
-                    <h3 className="text-base font-black text-[#096475] mb-2">
-                      {rec.title}
-                    </h3>
-                    <p className="text-xs text-[#52636a] leading-relaxed mb-3">
-                      {rec.rationale}
-                    </p>
+                    <div className="pt-3 border-t border-[#e5ecee] text-xs text-[#1d2b30] leading-relaxed">
+                      <strong className="text-[#096475]">Action :</strong> {rec.action}
+                    </div>
                   </div>
-                  <div className="pt-3 border-t border-[#e5ecee] text-xs text-[#1d2b30] leading-relaxed">
-                    <strong className="text-[#096475]">Action :</strong> {rec.action}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}
@@ -979,11 +1127,18 @@ export const ReportView: React.FC<Props> = ({
                 : ''
             }`}
           >
-            <div className="flex items-baseline gap-2.5 mb-4 print:mb-3 pb-2.5 border-b border-[#e8eff1] print-break-after-avoid">
-              <span className="text-xs font-mono font-bold text-[#00afa9]">06.</span>
-              <h2 className="text-xl font-black text-[#096475]">
-                Next Steps — Déploiement terrain & verrouillage des acquis
-              </h2>
+            <div className="flex items-center justify-between gap-4 mb-4 print:mb-3 pb-2.5 border-b border-[#dbe7e9] print-break-after-avoid">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#096475] text-white text-xs font-mono font-bold shrink-0">
+                  06
+                </span>
+                <h2 className="text-xl font-black text-[#096475]">
+                  Next Steps — Déploiement terrain & verrouillage des acquis
+                </h2>
+              </div>
+              <span className="hidden sm:inline-block text-xs font-semibold text-[#008c87] shrink-0">
+                Décembre → Janvier
+              </span>
             </div>
 
             <p className="text-sm text-[#334155] leading-relaxed mb-5 print:mb-3 max-w-3xl print-max-w-none">
@@ -991,11 +1146,13 @@ export const ReportView: React.FC<Props> = ({
             </p>
 
             {/* 2 Milestones: December Agency Visit + January Lock-In */}
-            <div className="grid grid-cols-1 md:grid-cols-2 print-grid-2 gap-4 print:gap-3 mb-6 print:mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 print-grid-2 gap-4 print:gap-3 mb-5 print:mb-3.5">
               {NEXT_STEPS_MILESTONES.map((step, idx) => (
                 <div
                   key={idx}
-                  className="rounded-xl border border-[#d6e6e8] bg-[#f8fbfb] p-5 print:p-3.5 flex flex-col justify-between"
+                  className={`rounded-xl border border-[#d6e6e8] border-t-2 ${
+                    idx === 0 ? 'border-t-[#00afa9]' : 'border-t-[#096475]'
+                  } bg-[#f5fbfb] p-5 print:p-3.5 flex flex-col justify-between`}
                 >
                   <div>
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
@@ -1013,8 +1170,8 @@ export const ReportView: React.FC<Props> = ({
                       {step.summary}
                     </p>
                   </div>
-                  <div className="pt-2.5 border-t border-[#e1ecee] text-xs text-[#1d2b30] leading-relaxed">
-                    <strong className="text-[#096475]">Livrable clé :</strong>{' '}
+                  <div className="pt-2.5 border-t border-[#d8e8ea] text-xs text-[#1d2b30] leading-relaxed">
+                    <strong className="text-[#096475]">Livrable :</strong>{' '}
                     {step.deliverable}
                   </div>
                 </div>
@@ -1022,7 +1179,7 @@ export const ReportView: React.FC<Props> = ({
             </div>
 
             {/* 3-Day Planning Blueprint for 12 Participants */}
-            <div className="rounded-2xl border border-[#e1e9eb] bg-white p-5 print:p-4">
+            <div className="rounded-2xl border border-[#d8e7e9] border-t-2 border-t-[#096475] bg-white p-5 print:p-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4 print:mb-3">
                 <h3 className="text-base font-black text-[#096475]">
                   {JANUARY_PLANNING_META.title}
@@ -1036,33 +1193,35 @@ export const ReportView: React.FC<Props> = ({
                 {JANUARY_PLANNING_DAYS.map((item) => (
                   <div
                     key={item.day}
-                    className="rounded-xl border border-[#e5ecee] bg-[#fafcfd] p-4 print:p-3 flex flex-col justify-between"
+                    className="rounded-xl border border-[#dce9eb] bg-[#fafcfd] overflow-hidden flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <span className="text-xs font-mono font-black text-[#00afa9]">
+                      <div className="bg-[#eef7f8] px-3.5 py-2 border-b border-[#e1eff1] flex items-center justify-between gap-2">
+                        <span className="text-xs font-mono font-black text-[#096475]">
                           {item.day}
                         </span>
-                        <span className="text-[11px] font-semibold text-[#6d7d83]">
+                        <span className="text-[11px] font-semibold text-[#008c87]">
                           {item.format}
                         </span>
                       </div>
-                      <h4 className="text-sm font-black text-[#096475] mb-2.5 print:mb-2">
-                        {item.title}
-                      </h4>
+                      <div className="p-3.5 print:p-3">
+                        <h4 className="text-sm font-black text-[#096475] mb-2">
+                          {item.title}
+                        </h4>
 
-                      <div className="space-y-2 text-xs text-[#334155] leading-relaxed">
-                        <p>
-                          <strong className="text-[#096475]">Matin :</strong> {item.morning}
-                        </p>
-                        <p>
-                          <strong className="text-[#096475]">Après-midi :</strong>{' '}
-                          {item.afternoon}
-                        </p>
+                        <div className="space-y-1.5 text-xs text-[#334155] leading-relaxed">
+                          <p>
+                            <strong className="text-[#096475]">Matin :</strong> {item.morning}
+                          </p>
+                          <p>
+                            <strong className="text-[#096475]">Après-midi :</strong>{' '}
+                            {item.afternoon}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="mt-3 pt-2.5 border-t border-[#e5ecee] text-xs text-[#1d2b30] leading-relaxed">
+                    <div className="px-3.5 py-2.5 bg-[#f4fafa] border-t border-[#e1eff1] text-xs text-[#1d2b30] leading-relaxed">
                       <strong className="text-[#008c87]">Cap visé :</strong> {item.outcome}
                     </div>
                   </div>
@@ -1072,12 +1231,20 @@ export const ReportView: React.FC<Props> = ({
           </section>
         )}
 
-        {/* Footer */}
-        <footer className="mt-12 print:mt-5 pt-6 print:pt-3 border-t border-[#e1e9eb] flex flex-wrap items-center justify-between gap-2 text-xs text-[#6d7d83] print-break-inside-avoid">
-          <span>Connecteo · Chaque expérience est unique</span>
-          <span>Rapport généré automatiquement · {today}</span>
-        </footer>
+          {/* Footer */}
+          <footer className="mt-10 print:mt-4 pt-5 print:pt-3 border-t border-[#d6e7e9] flex flex-wrap items-center justify-between gap-2 text-xs text-[#6d7d83] print-break-inside-avoid">
+            <span className="font-semibold text-[#096475]">Connecteo · Chaque expérience est unique</span>
+            <span>Rapport généré automatiquement · {today}</span>
+          </footer>
+        </div>
       </div>
+
+      {/* ================================================================
+          LAST PAGE : CONNECTEO CLOSING SLIDE (MERCI.)
+         ================================================================ */}
+      {config.includeCovers !== false && (
+        <ReportClosingSlide logoDataUri={logoDataUri} config={config} />
+      )}
     </div>
   );
 };
