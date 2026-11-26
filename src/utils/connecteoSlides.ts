@@ -1,3 +1,8 @@
+export const CLOSING_SLIDE_DEFAULTS = {
+  title: 'Merci',
+  headline: 'Misaotra betsaka !',
+  message: 'Aux conseillers, pour leur engagement.',
+};
 export function buildCoverArtworkSvgString(): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 540" preserveAspectRatio="xMaxYMid slice" style="position:absolute;right:0;top:0;height:100%;width:420px;pointer-events:none;" aria-hidden="true">
     <defs>
