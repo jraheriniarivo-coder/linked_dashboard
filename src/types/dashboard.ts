@@ -42,7 +42,11 @@ export interface ReportConfig {
   facilitator: string;
   facilitatorEmail?: string;
   trainingPeriod?: string;
+  trainingLocation?: string;
+  clientLogoDataUri?: string;
   coverSubtitle?: string;
+  closingHeadline?: string;
+  closingMessage?: string;
   programTag: string;
   customIntro: string;
   includeCovers?: boolean;

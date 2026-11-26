@@ -8,6 +8,7 @@ import {
   Clock,
   Download,
   FileText,
+  Presentation,
   Printer,
   Search,
   SlidersHorizontal,
@@ -37,6 +38,7 @@ interface Props {
   config: ReportConfig;
   onUpdateConfig: (patch: Partial<ReportConfig>) => void;
   onDownloadHtml: () => void;
+  onDownloadPptx: () => Promise<void>;
   onLoadDemo: () => void;
 }
 
@@ -84,13 +86,25 @@ export const ReportView: React.FC<Props> = ({
   config,
   onUpdateConfig,
   onDownloadHtml,
+  onDownloadPptx,
   onLoadDemo,
 }) => {
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [verdictFilter, setVerdictFilter] = useState<VerdictCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
+  const [isExportingPptx, setIsExportingPptx] = useState(false);
   const learnerRefs = useRef<Record<string, HTMLElement | null>>({});
+
+  const handlePptxClick = async () => {
+    if (isExportingPptx) return;
+    setIsExportingPptx(true);
+    try {
+      await onDownloadPptx();
+    } finally {
+      setIsExportingPptx(false);
+    }
+  };
 
   const today = useMemo(
     () =>
@@ -236,6 +250,16 @@ export const ReportView: React.FC<Props> = ({
               <Download className="w-4 h-4" />
               Télécharger HTML
             </button>
+
+            <button
+              type="button"
+              onClick={handlePptxClick}
+              disabled={isExportingPptx}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#064552] text-white text-sm font-bold hover:bg-[#043640] disabled:opacity-60 transition-colors cursor-pointer whitespace-nowrap"
+            >
+              <Presentation className="w-4 h-4 text-[#ffa900]" />
+              {isExportingPptx ? 'Génération PPT…' : 'Télécharger PPT'}
+            </button>
           </div>
         </div>
 
@@ -306,7 +330,20 @@ export const ReportView: React.FC<Props> = ({
 
             <div>
               <label className="block text-xs font-bold text-[#47585e] mb-1">
-                Email formateur (page Merci)
+                Lieu de formation
+              </label>
+              <input
+                type="text"
+                value={config.trainingLocation ?? 'Zone Futura Andranome'}
+                onChange={(e) => onUpdateConfig({ trainingLocation: e.target.value })}
+                placeholder="Ex. Zone Futura Andranome"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[#d6e1e3] focus:outline-none focus:border-[#00afa9]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#47585e] mb-1">
+                Email Trainer Animator (page Merci)
               </label>
               <input
                 type="text"
@@ -317,7 +354,50 @@ export const ReportView: React.FC<Props> = ({
               />
             </div>
 
-            <div className="md:col-span-2">
+            <div>
+              <label className="block text-xs font-bold text-[#47585e] mb-1">
+                Logo client (PNG / JPG / SVG)
+              </label>
+              <div className="flex items-center gap-2">
+                <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#d6e1e3] bg-[#fafcfd] text-xs font-bold text-[#096475] hover:bg-[#eef7f7] cursor-pointer whitespace-nowrap">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === 'string') {
+                          onUpdateConfig({ clientLogoDataUri: reader.result });
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                  {config.clientLogoDataUri ? 'Changer le logo' : 'Importer un logo'}
+                </label>
+                {config.clientLogoDataUri && (
+                  <>
+                    <img
+                      src={config.clientLogoDataUri}
+                      alt="Logo client"
+                      className="h-8 w-auto max-w-[80px] object-contain rounded border border-[#e1e9eb] bg-white p-0.5"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => onUpdateConfig({ clientLogoDataUri: '' })}
+                      className="text-xs font-semibold text-[#c62828] hover:underline cursor-pointer"
+                    >
+                      Retirer
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="md:col-span-2 lg:col-span-4">
               <label className="block text-xs font-bold text-[#47585e] mb-1">
                 Sous-titre couverture
               </label>
@@ -326,6 +406,32 @@ export const ReportView: React.FC<Props> = ({
                 value={config.coverSubtitle || ''}
                 onChange={(e) => onUpdateConfig({ coverSubtitle: e.target.value })}
                 placeholder="Ex. Renforcer la posture, l’écoute active et la maîtrise du recouvrement amiable en production."
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[#d6e1e3] focus:outline-none focus:border-[#00afa9]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#47585e] mb-1">
+                Sous-titre page « Merci »
+              </label>
+              <input
+                type="text"
+                value={config.closingHeadline ?? 'Misaotra betsaka !'}
+                onChange={(e) => onUpdateConfig({ closingHeadline: e.target.value })}
+                placeholder="Ex. Misaotra betsaka !"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[#d6e1e3] focus:outline-none focus:border-[#00afa9]"
+              />
+            </div>
+
+            <div className="md:col-span-2 lg:col-span-3">
+              <label className="block text-xs font-bold text-[#47585e] mb-1">
+                Message page « Merci » (1 ligne par phrase, laissez vide pour masquer)
+              </label>
+              <textarea
+                value={config.closingMessage ?? 'Aux conseillers, pour leur engagement.'}
+                onChange={(e) => onUpdateConfig({ closingMessage: e.target.value })}
+                placeholder="Ex. Aux conseillers, pour leur engagement."
+                rows={2}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-[#d6e1e3] focus:outline-none focus:border-[#00afa9]"
               />
             </div>
@@ -440,24 +546,38 @@ export const ReportView: React.FC<Props> = ({
 
         <div className="px-6 py-8 sm:px-12 sm:py-10 print:px-0 print:py-3">
           {/* Document Header */}
-          <header className="rounded-xl bg-gradient-to-br from-[#f4fafa] via-white to-[#eef8f8] border border-[#d6e7e9] px-6 py-5 print:px-5 print:py-4 mb-9 print:mb-5 print-break-inside-avoid">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-4 print:mb-2.5">
-              <img
-                src={logoDataUri}
-                alt="Connecteo"
-                className="h-10 sm:h-11 w-auto block"
-              />
+          <header className="rounded-xl bg-gradient-to-br from-[#f4fafa] via-white to-[#eef8f8] border border-[#d6e7e9] px-6 py-4 print:px-5 print:py-3.5 mb-8 print:mb-5 print-break-inside-avoid">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-3 print:mb-2">
+              <div className="flex flex-wrap items-center gap-4">
+                <img
+                  src={logoDataUri}
+                  alt="Connecteo"
+                  className="h-9 sm:h-10 w-auto block"
+                />
+                {config.clientLogoDataUri && (
+                  <>
+                    <span className="h-7 w-px bg-[#d6e7e9]" aria-hidden="true" />
+                    <img
+                      src={config.clientLogoDataUri}
+                      alt={config.clientName ? `Logo ${config.clientName}` : 'Logo client'}
+                      className="h-8 sm:h-9 w-auto max-w-[140px] object-contain block"
+                    />
+                  </>
+                )}
+              </div>
               <span className="text-xs font-bold tracking-wide text-[#008c87]">
                 {config.programTag}
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-black text-[#096475] tracking-tight leading-tight max-w-3xl print-max-w-none [text-wrap:balance]">
-              {config.reportTitle}
-            </h1>
+            {config.includeCovers === false && (
+              <h1 className="text-3xl sm:text-4xl font-black text-[#096475] tracking-tight leading-tight max-w-3xl print-max-w-none mb-3 [text-wrap:balance]">
+                {config.reportTitle}
+              </h1>
+            )}
 
             {/* Unboxed typographic metadata */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[#6d7d83] mt-3 pt-3 border-t border-[#e1eff1]">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[#6d7d83] pt-3 border-t border-[#e1eff1]">
               {config.clientName && (
                 <>
                   <span>
@@ -470,7 +590,14 @@ export const ReportView: React.FC<Props> = ({
                 Périmètre : <strong className="text-[#096475]">{groupLabel}</strong>
               </span>
               <span aria-hidden="true">·</span>
-              <span>Facilitateur : {config.facilitator}</span>
+              <span>
+                Lieu :{' '}
+                <strong className="text-[#1d2b30]">
+                  {(config.trainingLocation || '').trim() || 'Zone Futura Andranome'}
+                </strong>
+              </span>
+              <span aria-hidden="true">·</span>
+              <span>Trainer Animator : {config.facilitator}</span>
               <span aria-hidden="true">·</span>
               <span>Édité le {today}</span>
               <span aria-hidden="true">·</span>

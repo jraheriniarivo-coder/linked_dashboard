@@ -9,6 +9,7 @@ import { getConnecteoLogoDataUri } from './connecteoLogo';
 import {
   buildClosingArtworkSvgString,
   buildCoverArtworkSvgString,
+  CLOSING_SLIDE_DEFAULTS,
   splitCoverTitle,
 } from './connecteoSlides';
 
@@ -91,10 +92,24 @@ export function buildStandaloneReportHtml(
   const showCovers = config.includeCovers !== false;
   const { lead: coverLead, main: coverMain } = splitCoverTitle(config.reportTitle);
   const periodLabel = (config.trainingPeriod || '').trim() || 'Parcours 5 jours';
+  const locationLabel = (config.trainingLocation || '').trim() || 'Zone Futura Andranome';
+  const clientLogoDataUri = (config.clientLogoDataUri || '').trim();
   const coverSubtitle =
     (config.coverSubtitle || '').trim() ||
     'Renforcer la posture, l’écoute active et la maîtrise du recouvrement amiable en production.';
   const facilitatorEmail = (config.facilitatorEmail || '').trim();
+  const closingHeadline =
+    config.closingHeadline !== undefined
+      ? config.closingHeadline
+      : CLOSING_SLIDE_DEFAULTS.headline;
+  const rawClosingMessage =
+    config.closingMessage !== undefined
+      ? config.closingMessage
+      : CLOSING_SLIDE_DEFAULTS.message;
+  const closingMessageLines = rawClosingMessage
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
 
   const verdictLabel: Record<string, string> = {
     expert: 'Expert',
@@ -211,7 +226,9 @@ export function buildStandaloneReportHtml(
     .slide-top-accent { position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #00c2ba 0%, #00e0d6 70%, #ffa900 100%); }
     .slide-brand-tag { margin-top: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; color: rgba(255,255,255,0.95); text-transform: uppercase; }
     .slide-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.22em; color: #00c2ba; text-transform: uppercase; margin-bottom: 12px; }
-    .slide-meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px; padding-right: 170px; position: relative; z-index: 2; }
+    .slide-meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 26px; padding-right: 170px; position: relative; z-index: 2; }
+    .slide-brand-row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; position: relative; z-index: 2; }
+    .slide-client-badge { background: rgba(255,255,255,0.96); border-radius: 10px; padding: 6px 12px; display: inline-flex; align-items: center; }
     .slide-meta-item { display: flex; align-items: center; gap: 12px; }
     .slide-meta-icon { width: 40px; height: 40px; border-radius: 999px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .doc-shell { max-width: 1040px; margin: 0 auto 24px; background: #ffffff; border: 1px solid #e1e9eb; border-radius: 16px; overflow: hidden; }
@@ -262,14 +279,22 @@ export function buildStandaloneReportHtml(
   <section class="slide-page" aria-label="Page de couverture">
     <div class="slide-top-accent"></div>
     ${coverArtworkSvg}
-    <div style="position:relative;z-index:2;">
-      <img src="${logoDataUri}" alt="Connecteo" style="height:46px;width:auto;display:block;" />
-      <div class="slide-brand-tag">CHAQUE EXPÉRIENCE EST UNIQUE</div>
+    <div class="slide-brand-row">
+      <div>
+        <img src="${logoDataUri}" alt="Connecteo" style="height:46px;width:auto;display:block;" />
+        <div class="slide-brand-tag">CHAQUE EXPÉRIENCE EST UNIQUE</div>
+      </div>
+      ${
+        clientLogoDataUri
+          ? `<div style="height:40px;width:1px;background:rgba(255,255,255,0.25);"></div>
+             <div class="slide-client-badge"><img src="${clientLogoDataUri}" alt="${esc(config.clientName || 'Logo client')}" style="height:34px;width:auto;max-width:150px;object-fit:contain;display:block;" /></div>`
+          : ''
+      }
     </div>
 
     <div style="position:relative;z-index:2;max-width:640px;margin:auto 0;padding:24px 0;">
       <div class="slide-eyebrow">RAPPORT DE FORMATION</div>
-      <div style="font-size:46px;line-height:1.08;letter-spacing:-0.02em;color:#ffffff;">
+      <div style="font-size:44px;line-height:1.1;letter-spacing:-0.02em;color:#ffffff;">
         ${coverLead ? `<div style="font-weight:400;">${esc(coverLead)}</div>` : ''}
         <div style="font-weight:900;">${esc(coverMain)}</div>
       </div>
@@ -286,6 +311,16 @@ export function buildStandaloneReportHtml(
         <div>
           <div style="font-size:14px;font-weight:700;color:#ffffff;line-height:1.2;">${esc(periodLabel)}</div>
           <div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:2px;">${esc(groupLabel)} · Renforcement RC</div>
+        </div>
+      </div>
+
+      <div class="slide-meta-item">
+        <div class="slide-meta-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00c2ba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#ffffff;line-height:1.2;">${esc(locationLabel)}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:2px;">Lieu de formation</div>
         </div>
       </div>
 
@@ -318,12 +353,20 @@ export function buildStandaloneReportHtml(
     <div class="doc-inner">
       <header class="hero-header">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:12px;">
-          <img src="${logoDataUri}" alt="Connecteo" style="height:42px;width:auto;display:block;" />
+          <div style="display:flex;align-items:center;gap:14px;">
+            <img src="${logoDataUri}" alt="Connecteo" style="height:40px;width:auto;display:block;" />
+            ${
+              clientLogoDataUri
+                ? `<div style="height:28px;width:1px;background:#d6e7e9;"></div>
+                   <img src="${clientLogoDataUri}" alt="${esc(config.clientName || 'Logo client')}" style="height:34px;width:auto;max-width:140px;object-fit:contain;display:block;" />`
+                : ''
+            }
+          </div>
           <span style="font-size:12px;color:#008c87;font-weight:700;">${esc(config.programTag)}</span>
         </div>
-        <h1>${esc(config.reportTitle)}</h1>
-        <div style="font-size:13px;color:#6d7d83;margin-top:10px;padding-top:10px;border-top:1px solid #e1eff1;">
-          ${config.clientName ? `Client : <strong style="color:#1d2b30;">${esc(config.clientName)}</strong> · ` : ''}Périmètre : <strong style="color:#096475;">${esc(groupLabel)}</strong> · Facilitateur : ${esc(config.facilitator)} · Édité le ${esc(todayLabel)} · ${analysis.total} apprenants
+        ${showCovers ? '' : `<h1 style="margin-bottom:10px;">${esc(config.reportTitle)}</h1>`}
+        <div style="font-size:13px;color:#6d7d83;padding-top:10px;border-top:1px solid #e1eff1;">
+          ${config.clientName ? `Client : <strong style="color:#1d2b30;">${esc(config.clientName)}</strong> · ` : ''}Périmètre : <strong style="color:#096475;">${esc(groupLabel)}</strong> · Lieu : <strong style="color:#1d2b30;">${esc(locationLabel)}</strong> · Trainer Animator : ${esc(config.facilitator)} · Édité le ${esc(todayLabel)} · ${analysis.total} apprenants
         </div>
       </header>
 
@@ -496,20 +539,35 @@ export function buildStandaloneReportHtml(
   <section class="slide-page section-break" aria-label="Page de clôture Merci">
     <div class="slide-top-accent"></div>
     ${closingArtworkSvg}
-    <div style="position:relative;z-index:2;">
-      <img src="${logoDataUri}" alt="Connecteo" style="height:46px;width:auto;display:block;" />
-      <div class="slide-brand-tag">CHAQUE EXPÉRIENCE EST UNIQUE</div>
+    <div class="slide-brand-row">
+      <div>
+        <img src="${logoDataUri}" alt="Connecteo" style="height:46px;width:auto;display:block;" />
+        <div class="slide-brand-tag">CHAQUE EXPÉRIENCE EST UNIQUE</div>
+      </div>
+      ${
+        clientLogoDataUri
+          ? `<div style="height:40px;width:1px;background:rgba(255,255,255,0.25);"></div>
+             <div class="slide-client-badge"><img src="${clientLogoDataUri}" alt="${esc(config.clientName || 'Logo client')}" style="height:34px;width:auto;max-width:150px;object-fit:contain;display:block;" /></div>`
+          : ''
+      }
     </div>
 
     <div style="position:relative;z-index:2;max-width:560px;margin:auto 0;padding:24px 0;">
       <div style="font-size:74px;font-weight:900;letter-spacing:-0.02em;line-height:1;color:#ffffff;">
-        Merci<span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:#00bfb6;margin-left:6px;"></span>
+        ${esc(CLOSING_SLIDE_DEFAULTS.title)}<span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:#00bfb6;margin-left:6px;"></span>
       </div>
-      <div style="margin-top:14px;font-size:24px;font-weight:900;color:#00c2ba;">Misaotra betsaka !</div>
-      <div style="margin-top:18px;font-size:18px;line-height:1.55;color:rgba(255,255,255,0.9);">
-        <div>À la PAMF, pour sa confiance.</div>
-        <div>Aux conseillers, pour leur engagement.</div>
-      </div>
+      ${
+        closingHeadline.trim()
+          ? `<div style="margin-top:14px;font-size:24px;font-weight:900;color:#00c2ba;">${esc(closingHeadline)}</div>`
+          : ''
+      }
+      ${
+        closingMessageLines.length > 0
+          ? `<div style="margin-top:18px;font-size:18px;line-height:1.55;color:rgba(255,255,255,0.9);">${closingMessageLines
+              .map((line) => `<div>${esc(line)}</div>`)
+              .join('')}</div>`
+          : ''
+      }
     </div>
 
     <div style="position:relative;z-index:2;font-size:13px;color:rgba(255,255,255,0.85);padding-right:170px;">

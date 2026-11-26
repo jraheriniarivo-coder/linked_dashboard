@@ -13,6 +13,7 @@ import {
   TabId,
 } from './types/dashboard';
 import { buildStandaloneReportHtml } from './utils/exportReportHtml';
+import { exportReportToPptx } from './utils/exportReportPptx';
 import { analyzeCohort } from './utils/reportAnalytics';
 
 const STORAGE_KEY = 'connecteo_dashboard_v1';
@@ -23,13 +24,17 @@ const INIT_KEY = `${STORAGE_KEY}_initialized`;
 const HUB_RETURN_URL = 'https://le-recouvrement.vercel.app/index.html';
 
 const DEFAULT_REPORT_CONFIG: ReportConfig = {
-  reportTitle: 'Formation Recouvrement — Bilan 5 jours',
+  reportTitle: 'Gestion de la relation client appliqué au recouvrement',
   clientName: '',
   facilitator: 'Joatina Dylan RAHERINIARIVO',
   facilitatorEmail: '',
   trainingPeriod: 'Parcours 5 jours',
+  trainingLocation: 'Zone Futura Andranomena',
+  clientLogoDataUri: '',
   coverSubtitle:
     'Renforcer la posture, l’écoute active et la maîtrise du recouvrement amiable en production.',
+  closingHeadline: 'Misaotra betsaka !',
+  closingMessage: 'Aux conseillers, pour leur engagement.',
   programTag: 'Connecteo 2026 · Parcours Opérationnel',
   customIntro: '',
   includeCovers: true,
@@ -81,6 +86,9 @@ export default function App() {
     const merged = { ...DEFAULT_REPORT_CONFIG, ...saved };
     if (merged.programTag === 'Connecteo 2026 · Parcours Certifiant') {
       merged.programTag = DEFAULT_REPORT_CONFIG.programTag;
+    }
+    if (merged.reportTitle === 'Formation Recouvrement — Bilan 5 jours') {
+      merged.reportTitle = DEFAULT_REPORT_CONFIG.reportTitle;
     }
     return merged;
   });
@@ -297,6 +305,28 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadReportPptx = async () => {
+    const todayLabel = new Date().toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    const suffix =
+      effectiveWave === 'all'
+        ? ''
+        : `_${groupLabel.replace(/\s+/g, '_').toLowerCase()}`;
+    const fileName = `rapport_formation_connecteo${suffix}_${new Date()
+      .toISOString()
+      .slice(0, 10)}.pptx`;
+    await exportReportToPptx(
+      cohortAnalysis,
+      reportConfig,
+      groupLabel,
+      todayLabel,
+      fileName
+    );
+  };
+
   const tabs: Array<{ id: TabId; label: string; icon: typeof FileUp }> = [
     { id: 'import', label: 'Import', icon: FileUp },
     { id: 'learners', label: 'Apprenants', icon: Users },
@@ -462,6 +492,7 @@ export default function App() {
               setReportConfig((prev) => ({ ...prev, ...patch }))
             }
             onDownloadHtml={handleDownloadReportHtml}
+            onDownloadPptx={handleDownloadReportPptx}
             onLoadDemo={handleLoadDemo}
           />
         )}

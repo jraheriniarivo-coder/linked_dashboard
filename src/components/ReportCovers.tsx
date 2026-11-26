@@ -1,7 +1,7 @@
 import React from 'react';
-import { Calendar, User, Users } from 'lucide-react';
+import { Calendar, MapPin, User, Users } from 'lucide-react';
 import { CohortAnalysis, ReportConfig } from '../types/dashboard';
-import { splitCoverTitle } from '../utils/connecteoSlides';
+import { CLOSING_SLIDE_DEFAULTS, splitCoverTitle } from '../utils/connecteoSlides';
 
 interface CoverProps {
   logoDataUri: string;
@@ -156,12 +156,30 @@ const ClosingWaveArtwork: React.FC = () => (
   </svg>
 );
 
-const SlideBrandHeader: React.FC<{ logoDataUri: string }> = ({ logoDataUri }) => (
-  <div>
-    <img src={logoDataUri} alt="Connecteo" className="h-11 sm:h-12 w-auto block" />
-    <div className="mt-1.5 text-[11px] sm:text-xs font-semibold tracking-[0.14em] text-white/95 uppercase">
-      CHAQUE EXPÉRIENCE EST UNIQUE
+const SlideBrandHeader: React.FC<{
+  logoDataUri: string;
+  clientLogoDataUri?: string;
+  clientName?: string;
+}> = ({ logoDataUri, clientLogoDataUri, clientName }) => (
+  <div className="flex flex-wrap items-center gap-4">
+    <div>
+      <img src={logoDataUri} alt="Connecteo" className="h-11 sm:h-12 w-auto block" />
+      <div className="mt-1.5 text-[11px] sm:text-xs font-semibold tracking-[0.14em] text-white/95 uppercase">
+        CHAQUE EXPÉRIENCE EST UNIQUE
+      </div>
     </div>
+    {clientLogoDataUri && (
+      <>
+        <div className="h-10 w-px bg-white/25 hidden sm:block" aria-hidden="true" />
+        <div className="bg-white/95 rounded-xl px-3.5 py-2 shadow-sm flex items-center">
+          <img
+            src={clientLogoDataUri}
+            alt={clientName ? `Logo ${clientName}` : 'Logo client'}
+            className="h-8 sm:h-9 w-auto max-w-[160px] object-contain block"
+          />
+        </div>
+      </>
+    )}
   </div>
 );
 
@@ -173,6 +191,7 @@ export const ReportCoverSlide: React.FC<CoverProps> = ({
 }) => {
   const { lead, main } = splitCoverTitle(config.reportTitle);
   const periodLabel = (config.trainingPeriod || '').trim() || 'Parcours 5 jours';
+  const locationLabel = (config.trainingLocation || '').trim() || 'Zone Futura Andranome';
   const subtitleText =
     (config.coverSubtitle || '').trim() ||
     'Renforcer la posture, l’écoute active et la maîtrise du recouvrement amiable en production.';
@@ -186,7 +205,11 @@ export const ReportCoverSlide: React.FC<CoverProps> = ({
       <CoverSignalArtwork />
 
       <div className="relative z-10">
-        <SlideBrandHeader logoDataUri={logoDataUri} />
+        <SlideBrandHeader
+          logoDataUri={logoDataUri}
+          clientLogoDataUri={config.clientLogoDataUri}
+          clientName={config.clientName}
+        />
       </div>
 
       <div className="relative z-10 max-w-2xl my-auto py-8">
@@ -194,7 +217,7 @@ export const ReportCoverSlide: React.FC<CoverProps> = ({
           RAPPORT DE FORMATION
         </div>
 
-        <h1 className="text-4xl sm:text-5xl leading-[1.08] tracking-tight text-white [text-wrap:balance]">
+        <h1 className="text-3xl sm:text-5xl leading-[1.1] tracking-tight text-white [text-wrap:balance]">
           {lead && <span className="block font-normal">{lead}</span>}
           <span className="block font-black">{main}</span>
         </h1>
@@ -204,7 +227,7 @@ export const ReportCoverSlide: React.FC<CoverProps> = ({
         </p>
       </div>
 
-      <div className="relative z-10 flex flex-wrap items-center gap-x-8 gap-y-4 pt-2 pr-12 sm:pr-44">
+      <div className="relative z-10 flex flex-wrap items-center gap-x-6 gap-y-4 pt-2 pr-12 sm:pr-44">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
             <Calendar className="w-4 h-4 text-[#00c2ba]" />
@@ -212,6 +235,16 @@ export const ReportCoverSlide: React.FC<CoverProps> = ({
           <div>
             <div className="text-sm font-bold text-white leading-tight">{periodLabel}</div>
             <div className="text-xs text-white/75 mt-0.5">{groupLabel} · Renforcement RC</div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
+            <MapPin className="w-4 h-4 text-[#00c2ba]" />
+          </div>
+          <div>
+            <div className="text-sm font-bold text-white leading-tight">{locationLabel}</div>
+            <div className="text-xs text-white/75 mt-0.5">Lieu de formation</div>
           </div>
         </div>
 
@@ -249,6 +282,18 @@ export const ReportCoverSlide: React.FC<CoverProps> = ({
 
 export const ReportClosingSlide: React.FC<ClosingProps> = ({ logoDataUri, config }) => {
   const email = (config.facilitatorEmail || '').trim();
+  const closingHeadline =
+    config.closingHeadline !== undefined
+      ? config.closingHeadline
+      : CLOSING_SLIDE_DEFAULTS.headline;
+  const rawClosingMessage =
+    config.closingMessage !== undefined
+      ? config.closingMessage
+      : CLOSING_SLIDE_DEFAULTS.message;
+  const closingLines = rawClosingMessage
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
 
   return (
     <section
@@ -259,26 +304,35 @@ export const ReportClosingSlide: React.FC<ClosingProps> = ({ logoDataUri, config
       <ClosingWaveArtwork />
 
       <div className="relative z-10">
-        <SlideBrandHeader logoDataUri={logoDataUri} />
+        <SlideBrandHeader
+          logoDataUri={logoDataUri}
+          clientLogoDataUri={config.clientLogoDataUri}
+          clientName={config.clientName}
+        />
       </div>
 
       <div className="relative z-10 max-w-xl my-auto py-8">
         <div className="text-6xl sm:text-7xl font-black tracking-tight text-white leading-none flex items-baseline">
-          <span>Merci</span>
+          <span>{CLOSING_SLIDE_DEFAULTS.title}</span>
           <span
             aria-hidden="true"
             className="inline-block w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-[4px] bg-[#00bfb6] ml-1.5"
           />
         </div>
 
-        <div className="mt-4 text-xl sm:text-2xl font-black text-[#00c2ba]">
-          Misaotra betsaka !
-        </div>
+        {closingHeadline.trim() && (
+          <div className="mt-4 text-xl sm:text-2xl font-black text-[#00c2ba]">
+            {closingHeadline}
+          </div>
+        )}
 
-        <div className="mt-5 space-y-1 text-base sm:text-lg text-white/90 leading-relaxed">
-          <p>À la PAMF, pour sa confiance.</p>
-          <p>Aux conseillers, pour leur engagement.</p>
-        </div>
+        {closingLines.length > 0 && (
+          <div className="mt-5 space-y-1 text-base sm:text-lg text-white/90 leading-relaxed">
+            {closingLines.map((line, i) => (
+              <p key={i}>{line}</p>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="relative z-10 text-xs sm:text-sm text-white/85 pt-2 pr-12 sm:pr-44">
